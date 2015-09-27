@@ -13,11 +13,14 @@ namespace Fbx
 		private static readonly byte[] headerString
 			= Encoding.ASCII.GetBytes("Kaydara FBX Binary  \0\x1a\0");
 
-		// This data was entirely calculated by me. Turns out it works, fancy that!
-		private static readonly byte[] sourceId =  { 0x58, 0xAB, 0xA9, 0xF0, 0x6C, 0xA2, 0xD8, 0x3F, 0x4D, 0x47, 0x49, 0xA3, 0xB4, 0xB2, 0xE7, 0x3D };
-		private static readonly byte[] key =       { 0xE2, 0x4F, 0x7B, 0x5F, 0xCD, 0xE4, 0xC8, 0x6D, 0xDB, 0xD8, 0xFB, 0xD7, 0x40, 0x58, 0xC6, 0x78 };
+		// This data was entirely calculated by me, honest. Turns out it works, fancy that!
+		private static readonly byte[] sourceId =
+			{ 0x58, 0xAB, 0xA9, 0xF0, 0x6C, 0xA2, 0xD8, 0x3F, 0x4D, 0x47, 0x49, 0xA3, 0xB4, 0xB2, 0xE7, 0x3D };
+		private static readonly byte[] key =
+			{ 0xE2, 0x4F, 0x7B, 0x5F, 0xCD, 0xE4, 0xC8, 0x6D, 0xDB, 0xD8, 0xFB, 0xD7, 0x40, 0x58, 0xC6, 0x78 };
 		// This wasn't - it just appears at the end of every compliant file
-		private static readonly byte[] extension = { 0xF8, 0x5A, 0x8C, 0x6A, 0xDE, 0xF5, 0xD9, 0x7E, 0xEC, 0xE9, 0x0C, 0xE3, 0x75, 0x8F, 0x29, 0x0B };
+		private static readonly byte[] extension =
+			{ 0xF8, 0x5A, 0x8C, 0x6A, 0xDE, 0xF5, 0xD9, 0x7E, 0xEC, 0xE9, 0x0C, 0xE3, 0x75, 0x8F, 0x29, 0x0B };
 
 		// Number of null bytes between the footer code and the version
 		private const int footerZeroes1 = 20;
@@ -25,6 +28,10 @@ namespace Fbx
 		private const int footerZeroes2 = 120;
 
 		protected const int footerCodeSize = 16;
+
+		// This is used by the binary format instead of '::', and the component tokens are reversed
+		protected const string binarySeparator = "\0\x1";
+		protected const string asciiSeparator = "::";
 
 		// Checks if the first part of 'data' matches 'original'
 		protected static bool CheckEqual(byte[] data, byte[] original)
@@ -74,7 +81,7 @@ namespace Fbx
 			if (elementNode != null && elementNode.Properties.Count > 0)
 			{
 				var prop = elementNode.Properties[0];
-				if (prop is int)
+				if (prop is int || prop is long)
 					return (int)prop;
 			}
 			throw new FbxException(dataPos, "Timestamp has no " + element);
@@ -91,7 +98,9 @@ namespace Fbx
 			var timestamp = document.GetRelative("FBXHeaderExtension/CreationTimeStamp");
 			if (timestamp == null)
 				throw new FbxException(dataPos, "No creation timestamp");
-			return GenerateFooterCode(
+			try
+			{
+				return GenerateFooterCode(
 					GetTimestampVar(timestamp, dataPos, "Year"),
 					GetTimestampVar(timestamp, dataPos, "Month"),
 					GetTimestampVar(timestamp, dataPos, "Day"),
@@ -99,7 +108,12 @@ namespace Fbx
 					GetTimestampVar(timestamp, dataPos, "Minute"),
 					GetTimestampVar(timestamp, dataPos, "Second"),
 					GetTimestampVar(timestamp, dataPos, "Millisecond")
-				);
+					);
+			}
+			catch (ArgumentOutOfRangeException)
+			{
+				throw new FbxException(dataPos, "Invalid timestamp");
+			}
 		}
 
 		/// <summary>

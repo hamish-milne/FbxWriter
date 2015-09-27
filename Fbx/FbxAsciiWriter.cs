@@ -22,10 +22,6 @@ namespace Fbx
 			this.stream = stream;
 		}
 
-		// This is used by the binary format instead of '::'
-		// TODO: Maybe put this into the binary reader
-		private static readonly string[] separator = {"\0\x1"};
-
 		// Adds the given node text to the string
 		void BuildString(FbxNode node, StringBuilder sb, int indentLevel = 0)
 		{
@@ -42,19 +38,7 @@ namespace Fbx
 				sb.Append(' ');
 				if (p is string)
 				{
-					sb.Append('"');
-                    if (p.ToString().Contains(separator[0]))
-					{
-						var tokens = p.ToString().Split(separator, StringSplitOptions.None);
-						for (int i = tokens.Length - 1; i >= 0; i--)
-						{
-							sb.Append(tokens[i]);
-							if (i != 0)
-								sb.Append("::");
-						}
-					} else
-						sb.Append(p);
-					sb.Append('"');
+					sb.Append('"').Append(p).Append('"');
 				} else if (p is Array)
 				{
 					// ReSharper disable once PossibleNullReferenceException

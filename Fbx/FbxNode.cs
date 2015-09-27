@@ -24,6 +24,21 @@ namespace Fbx
 		public List<object> Properties { get; } = new List<object>();
 
 		/// <summary>
+		/// The first property element
+		/// </summary>
+		public object Value
+		{
+			get { return Properties.Count < 1 ? null : Properties[0]; }
+			set
+			{
+				if (Properties.Count < 1)
+					Properties.Add(value);
+				else
+					Properties[0] = value;
+			}
+		}
+
+		/// <summary>
 		/// The list of child/nested nodes
 		/// </summary>
 		/// <remarks>

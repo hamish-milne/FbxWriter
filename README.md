@@ -1,14 +1,15 @@
 # FBX manipulation for .NET
 
-- Read FBX binary files (Done)
+- Read FBX binary files (**Done**)
 - Read FBX ASCII files (TODO)
-- Write **fully compliant** FBX binary files (Done)
+- Write **fully compliant** FBX binary files (**Done**)
 - Write FBX ASCII files (Preview only)
 - Format detection (TODO)
-- Store and manipulate raw FBX object data (Done)
+- Store and manipulate raw FBX object data (**Done**)
 - Higher level processing of FBX nodes (TODO)
+- Optional integration with DotNetZip for more efficient compression (TODO)
 
-```
+```csharp
 using Fbx;
 
 class FbxExample
@@ -17,11 +18,14 @@ class FbxExample
 	{
 		// Read a file
 		var documentNode = FbxUtil.ReadBinary("MyModel.fbx");
+		
 		// Update a property
-		documentNode["Creator"].Properties[0] = "My Application";
+		documentNode["Creator"].Value = "My Application";
+		
 		// Preview the file in the console
 		var writer = new FbxAsciiWriter(Console.OpenStandardOutput());
 		writer.Write(documentNode);
+		
 		// Write the updated binary
 		FbxUtil.WriteBinary(documentNode, "MyModel_patched.fbx");
 	}

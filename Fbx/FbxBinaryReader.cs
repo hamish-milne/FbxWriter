@@ -63,7 +63,23 @@ namespace Fbx
 					return ReadArray(br => br.ReadBoolean(), typeof(bool));
 				case 'S':
 					var len = stream.ReadInt32();
-                    return len == 0 ? "" : Encoding.ASCII.GetString(stream.ReadBytes(len));
+                    var str = len == 0 ? "" : Encoding.ASCII.GetString(stream.ReadBytes(len));
+					// Convert \0\1 to '::' and reverse the tokens
+					if (str.Contains(binarySeparator))
+					{
+						var tokens = str.Split(new [] {binarySeparator}, StringSplitOptions.None);
+						var sb = new StringBuilder();
+						bool first = true;
+						for (int i = tokens.Length - 1; i >= 0; i--)
+						{	
+							if (!first)
+								sb.Append(asciiSeparator);
+							sb.Append(tokens[i]);
+							first = false;
+						}
+						str = sb.ToString();
+					}
+					return str;
 				case 'R':
 					return stream.ReadBytes(stream.ReadInt32());
 				default:

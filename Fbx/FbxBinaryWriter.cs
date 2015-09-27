@@ -77,7 +77,23 @@ namespace Fbx
 
 		static void WriteString(BinaryWriter stream, object obj)
 		{
-			var bytes = Encoding.ASCII.GetBytes(obj.ToString());
+			var str = obj.ToString();
+			// Replace "::" with \0\1 and reverse the tokens
+			if (str.Contains(asciiSeparator))
+			{
+				var tokens = str.Split(new []{ asciiSeparator }, StringSplitOptions.None);
+				var sb = new StringBuilder();
+				bool first = true;
+				for (int i = tokens.Length - 1; i >= 0; i--)
+				{
+					if (!first)
+						sb.Append(binarySeparator);
+					sb.Append(tokens[i]);
+					first = false;
+				}
+				str = sb.ToString();
+			}
+            var bytes = Encoding.ASCII.GetBytes(str);
 			stream.Write(bytes.Length);
 			stream.Write(bytes);
 		}

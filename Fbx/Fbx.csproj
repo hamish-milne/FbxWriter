@@ -44,6 +44,7 @@
     <Compile Include="FbxException.cs" />
     <Compile Include="FbxNode.cs" />
     <Compile Include="FbxAsciiReader.cs" />
+    <Compile Include="FbxUtil.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
