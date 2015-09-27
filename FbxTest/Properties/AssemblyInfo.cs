@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Fbx")]
-[assembly: AssemblyDescription("An FBX library for .NET")]
+[assembly: AssemblyTitle("FbxTest")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Fbx")]
-[assembly: AssemblyCopyright("Copyright © Hamish Milne 2015")]
+[assembly: AssemblyProduct("FbxTest")]
+[assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("07a221ac-5238-4c77-96de-e792c49d23e1")]
+[assembly: Guid("9e701cf3-bc98-4a9a-911c-9ca73e07ff26")]
 
 // Version information for an assembly consists of the following four values:
 //

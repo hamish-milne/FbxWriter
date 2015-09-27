@@ -3,7 +3,7 @@
 - Read FBX binary files (**Done**)
 - Read FBX ASCII files (TODO)
 - Write **fully compliant** FBX binary files (**Done**)
-- Write FBX ASCII files (Preview only)
+- Write FBX ASCII files (**Done**)
 - Format detection (TODO)
 - Store and manipulate raw FBX object data (**Done**)
 - Higher level processing of FBX nodes (TODO)
