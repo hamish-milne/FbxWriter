@@ -33,10 +33,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DeflateWithChecksum.cs" />
+    <Compile Include="FbxAsciiWriter.cs" />
+    <Compile Include="FbxBinary.cs" />
+    <Compile Include="FbxBinaryReader.cs" />
+    <Compile Include="FbxBinaryWriter.cs" />
+    <Compile Include="FbxException.cs" />
+    <Compile Include="FbxNode.cs" />
+    <Compile Include="FbxAsciiReader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
