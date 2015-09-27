@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Fbx
 {
+	/// <summary>
+	/// An error with the FBX data input
+	/// </summary>
 	public class FbxException : Exception
 	{
 		public FbxException(long position, string message) :

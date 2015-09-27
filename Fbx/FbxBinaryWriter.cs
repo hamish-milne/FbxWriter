@@ -7,16 +7,28 @@ using System.Runtime.InteropServices;
 
 namespace Fbx
 {
+	/// <summary>
+	/// Writes an FBX document to a binary stream
+	/// </summary>
 	public class FbxBinaryWriter : FbxBinary
 	{
 		private readonly Stream output;
 		private readonly MemoryStream memory;
 		private readonly BinaryWriter stream;
 
+		/// <summary>
+		/// The minimum size of an array in bytes before it is compressed
+		/// </summary>
 		public int CompressionThreshold { get; set; } = 1024;
 
+		/// <summary>
+		/// Creates a new writer
+		/// </summary>
+		/// <param name="stream"></param>
 		public FbxBinaryWriter(Stream stream)
 		{
+			if(stream == null)
+				throw new ArgumentNullException(nameof(stream));
 			output = stream;
 			// Wrap in a memory stream to guarantee seeking
 			memory = new MemoryStream();
@@ -48,7 +60,7 @@ namespace Fbx
 				{ typeof(bool),   new WriterInfo('C', (sw, obj) => sw.Write((bool)obj)) },
 				{ typeof(byte[]), new WriterInfo('R', WriteRaw) },
 				{ typeof(string), new WriterInfo('S', WriteString) },
-
+				// null elements indicate arrays - they are checked again with their element type
 				{ typeof(int[]),    new WriterInfo('i', null) },
 				{ typeof(long[]),   new WriterInfo('l', null) },
 				{ typeof(float[]),  new WriterInfo('f', null) },
@@ -133,8 +145,10 @@ namespace Fbx
 				writerInfo.writer(stream, obj);
 		}
 
+		// Data for a null node
 		static readonly byte[] nullData = new byte[13];
 
+		// Writes a single document to the buffer
 		void WriteNode(FbxNode node)
 		{
 			if (node == null)
@@ -188,6 +202,11 @@ namespace Fbx
 			}
 		}
 
+		/// <summary>
+		/// Writes an FBX file to the output
+		/// </summary>
+		/// <param name="topLevel"></param>
+		/// <param name="version"></param>
 		public void Write(FbxNode topLevel, int version = 7400)
 		{
 			stream.BaseStream.Position = 0;

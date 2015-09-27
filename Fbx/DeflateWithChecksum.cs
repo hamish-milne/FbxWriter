@@ -3,12 +3,18 @@ using System.IO.Compression;
 
 namespace Fbx
 {
+	/// <summary>
+	/// A wrapper for DeflateStream that calculates the Adler32 checksum of the payload
+	/// </summary>
 	public class DeflateWithChecksum : DeflateStream
 	{
 		private const int modAdler = 65521;
 		private uint checksumA;
 		private uint checksumB;
 
+		/// <summary>
+		/// Gets the Adler32 checksum at the current point in the stream
+		/// </summary>
 		public int Checksum
 		{
 			get
@@ -19,16 +25,19 @@ namespace Fbx
 			}
 		}
 
+		/// <inheritdoc />
 		public DeflateWithChecksum(Stream stream, CompressionMode mode) : base(stream, mode)
 		{
 			ResetChecksum();
 		}
 
+		/// <inheritdoc />
 		public DeflateWithChecksum(Stream stream, CompressionMode mode, bool leaveOpen) : base(stream, mode, leaveOpen)
 		{
 			ResetChecksum();
 		}
 
+		// Efficiently extends the checksum with the given buffer
 		void CalcChecksum(byte[] array, int offset, int count)
 		{
 			checksumA %= modAdler;
@@ -46,12 +55,14 @@ namespace Fbx
 			}
 		}
 
+		/// <inheritdoc />
 		public override void Write(byte[] array, int offset, int count)
 		{
 			base.Write(array, offset, count);
 			CalcChecksum(array, offset, count);
 		}
 
+		/// <inheritdoc />
 		public override int Read(byte[] array, int offset, int count)
 		{
 			var ret = base.Read(array, offset, count);
@@ -59,6 +70,9 @@ namespace Fbx
 			return ret;
 		}
 
+		/// <summary>
+		/// Initializes the checksum values
+		/// </summary>
 		public void ResetChecksum()
 		{
 			checksumA = 1;

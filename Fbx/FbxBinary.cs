@@ -4,8 +4,12 @@ using System.Text;
 
 namespace Fbx
 {
+	/// <summary>
+	/// Base class for binary stream wrappers
+	/// </summary>
 	public abstract class FbxBinary
 	{
+		// Header string, found at the top of all compliant files
 		private static readonly byte[] headerString
 			= Encoding.ASCII.GetBytes("Kaydara FBX Binary  \0\x1a\0");
 
@@ -15,11 +19,14 @@ namespace Fbx
 		// This wasn't - it just appears at the end of every compliant file
 		private static readonly byte[] extension = { 0xF8, 0x5A, 0x8C, 0x6A, 0xDE, 0xF5, 0xD9, 0x7E, 0xEC, 0xE9, 0x0C, 0xE3, 0x75, 0x8F, 0x29, 0x0B };
 
+		// Number of null bytes between the footer code and the version
 		private const int footerZeroes1 = 20;
+		// Number of null bytes between the footer version and extension code
 		private const int footerZeroes2 = 120;
 
 		protected const int footerCodeSize = 16;
 
+		// Checks if the first part of 'data' matches 'original'
 		protected static bool CheckEqual(byte[] data, byte[] original)
 		{
 			for (int i = 0; i < original.Length; i++)
@@ -28,11 +35,20 @@ namespace Fbx
 			return true;
 		}
 
+		/// <summary>
+		/// Writes the FBX header string
+		/// </summary>
+		/// <param name="stream"></param>
 		protected static void WriteHeader(Stream stream)
 		{
 			stream.Write(headerString, 0, headerString.Length);
 		}
 
+		/// <summary>
+		/// Reads the FBX header string
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <returns><c>true</c> if it's compliant</returns>
 		protected static bool ReadHeader(Stream stream)
 		{
 			var buf = new byte[headerString.Length];
@@ -51,6 +67,7 @@ namespace Fbx
 			}
 		}
 
+		// Gets a single timestamp component
 		static int GetTimestampVar(FbxNode timestamp, long dataPos, string element)
 		{
 			var elementNode = timestamp[element];
@@ -63,6 +80,12 @@ namespace Fbx
 			throw new FbxException(dataPos, "Timestamp has no " + element);
 		}
 
+		/// <summary>
+		/// Generates the unique footer code based on the document's timestamp
+		/// </summary>
+		/// <param name="document"></param>
+		/// <param name="dataPos"></param>
+		/// <returns>A 16-byte code</returns>
 		protected static byte[] GenerateFooterCode(FbxNode document, long dataPos)
 		{
 			var timestamp = document.GetRelative("FBXHeaderExtension/CreationTimeStamp");
@@ -79,6 +102,17 @@ namespace Fbx
 				);
 		}
 
+		/// <summary>
+		/// Generates a unique footer code based on a timestamp
+		/// </summary>
+		/// <param name="year"></param>
+		/// <param name="month"></param>
+		/// <param name="day"></param>
+		/// <param name="hour"></param>
+		/// <param name="minute"></param>
+		/// <param name="second"></param>
+		/// <param name="millisecond"></param>
+		/// <returns>A 16-byte code</returns>
 		protected static byte[] GenerateFooterCode(
 			int year, int month, int day,
 			int hour, int minute, int second, int millisecond)
@@ -107,6 +141,11 @@ namespace Fbx
 			return str;
 		}
 
+		/// <summary>
+		/// Writes the FBX footer extension (NB - not the unique footer code)
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="version"></param>
 		protected void WriteFooter(BinaryWriter stream, int version)
 		{
 			var zeroes = new byte[Math.Max(footerZeroes1, footerZeroes2)];
@@ -124,6 +163,12 @@ namespace Fbx
 			return true;
 		}
 
+		/// <summary>
+		/// Reads and checks the FBX footer extension (NB - not the unique footer code)
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="version"></param>
+		/// <returns><c>true</c> if it's compliant</returns>
 		protected bool CheckFooter(BinaryReader stream, int version)
 		{
 			var buffer = new byte[Math.Max(footerZeroes1, footerZeroes2)];

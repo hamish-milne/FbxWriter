@@ -4,17 +4,29 @@ using System.IO;
 
 namespace Fbx
 {
+	/// <summary>
+	/// Writes an FBX document in a text format
+	/// </summary>
 	public class FbxAsciiWriter
 	{
 		private readonly Stream stream;
 
+		/// <summary>
+		/// Creates a new reader
+		/// </summary>
+		/// <param name="stream"></param>
 		public FbxAsciiWriter(Stream stream)
 		{
+			if (stream == null)
+				throw new ArgumentNullException(nameof(stream));
 			this.stream = stream;
 		}
 
+		// This is used by the binary format instead of '::'
+		// TODO: Maybe put this into the binary reader
 		private static readonly string[] separator = {"\0\x1"};
 
+		// Adds the given node text to the string
 		void BuildString(FbxNode node, StringBuilder sb, int indentLevel = 0)
 		{
 			for (int i = 0; i < indentLevel; i++)
@@ -81,6 +93,13 @@ namespace Fbx
 			sb.Append('\n');
 		}
 
+		/// <summary>
+		/// Writes an FBX document to the stream
+		/// </summary>
+		/// <param name="topLevel"></param>
+		/// <remarks>
+		/// ASCII FBX files have no header or footer, so you can call this multiple times
+		/// </remarks>
 		public void Write(FbxNode topLevel)
 		{
 			var sb = new StringBuilder();

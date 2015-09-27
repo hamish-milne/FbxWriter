@@ -5,6 +5,9 @@ using System.IO.Compression;
 
 namespace Fbx
 {
+	/// <summary>
+	/// Reads FBX nodes from a binary stream
+	/// </summary>
 	public class FbxBinaryReader : FbxBinary
 	{
 		private readonly BinaryReader stream;
@@ -12,6 +15,13 @@ namespace Fbx
 
 		private delegate object ReadPrimitive(BinaryReader reader);
 
+		/// <summary>
+		/// Creates a new reader
+		/// </summary>
+		/// <param name="stream">The stream to read from</param>
+		/// <param name="errorLevel">When to throw an <see cref="FbxException"/></param>
+		/// <exception cref="ArgumentException"><paramref name="stream"/> does
+		/// not support seeking</exception>
 		public FbxBinaryReader(Stream stream, ErrorLevel errorLevel = ErrorLevel.Checked)
 		{
 			if(stream == null)
@@ -23,6 +33,7 @@ namespace Fbx
 			this.errorLevel = errorLevel;
 		}
 
+		// Reads a single property
 		object ReadProperty()
 		{
 			var dataType = (char) stream.ReadByte();
@@ -61,6 +72,7 @@ namespace Fbx
 			}
 		}
 
+		// Reads an array, decompressing it if required
 		Array ReadArray(ReadPrimitive readPrimitive, Type arrayType)
 		{
 			var len = stream.ReadInt32();
@@ -126,6 +138,7 @@ namespace Fbx
 			return ret;
 		}
 
+		// Reads a single node
 		FbxNode ReadNode()
 		{
 			var endOffset = stream.ReadInt32();
@@ -174,8 +187,13 @@ namespace Fbx
 			return node;
 		}
 
-		
-
+		/// <summary>
+		/// Reads an FBX document from the stream
+		/// </summary>
+		/// <param name="version">The file's reported version number</param>
+		/// <returns>The top-level node</returns>
+		/// <exception cref="FbxException">The FBX data was malformed
+		/// for the reader's error level</exception>
 		public FbxNode Read(out int version)
 		{
 			// Read header
@@ -193,7 +211,7 @@ namespace Fbx
 			{
 				nested = ReadNode();
 				if(nested != null)
-					node.Nodes.Add(nested);;
+					node.Nodes.Add(nested);
 			} while (nested != null);
 
 			// Read footer code
