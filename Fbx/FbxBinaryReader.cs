@@ -8,11 +8,11 @@ namespace Fbx
 	public class FbxBinaryReader : FbxBinary
 	{
 		private readonly BinaryReader stream;
-		private readonly bool strict;
+		private readonly ErrorLevel errorLevel;
 
 		private delegate object ReadPrimitive(BinaryReader reader);
 
-		public FbxBinaryReader(Stream stream, bool strict = true)
+		public FbxBinaryReader(Stream stream, ErrorLevel errorLevel = ErrorLevel.Checked)
 		{
 			if(stream == null)
 				throw new ArgumentNullException(nameof(stream));
@@ -20,7 +20,7 @@ namespace Fbx
 				throw new ArgumentException(
 					"The stream must support seeking. Try reading the data into a buffer first");
 			this.stream = new BinaryReader(stream, Encoding.ASCII);
-			this.strict = strict;
+			this.errorLevel = errorLevel;
 		}
 
 		object ReadProperty()
@@ -71,7 +71,7 @@ namespace Fbx
 			var endPos = stream.BaseStream.Position + compressedLen;
 			if (encoding != 0)
 			{
-				if(strict)
+				if(errorLevel >= ErrorLevel.Strict)
 				{
 					if(encoding != 1)
 						throw new FbxException(stream.BaseStream.Position - 1,
@@ -106,7 +106,7 @@ namespace Fbx
 			}
 			if (encoding != 0)
 			{
-				if (strict)
+				if (errorLevel >= ErrorLevel.Checked)
 				{
 					stream.BaseStream.Position = endPos - sizeof(int);
 					var checksumBytes = new byte[sizeof(int)];
@@ -137,7 +137,7 @@ namespace Fbx
 			if (endOffset == 0)
 			{
 				// The end offset should only be 0 in a null node
-				if(strict && (numProperties != 0 || propertyListLen != 0 || !string.IsNullOrEmpty(name)))
+				if(errorLevel >= ErrorLevel.Checked && (numProperties != 0 || propertyListLen != 0 || !string.IsNullOrEmpty(name)))
 					throw new FbxException(stream.BaseStream.Position,
 						"Invalid node; expected NULL record");
 				return null;
@@ -150,65 +150,69 @@ namespace Fbx
 			for (int i = 0; i < numProperties; i++)
 				node.Properties.Add(ReadProperty());
 
-			if(strict && stream.BaseStream.Position != propertyEnd)
+			if(errorLevel >= ErrorLevel.Checked && stream.BaseStream.Position != propertyEnd)
 				throw new FbxException(stream.BaseStream.Position,
 					"Too many bytes in property list, end point is " + propertyEnd);
 
 			// Read nested nodes
 			var listLen = endOffset - stream.BaseStream.Position;
-			if(name == "References")
-				Console.WriteLine(listLen);
-			if(listLen < 0)
-				throw new Exception();
+			if(errorLevel >= ErrorLevel.Checked && listLen < 0)
+				throw new FbxException(stream.BaseStream.Position,
+					"Node has invalid end point");
 			if (listLen > 0)
 			{
 				FbxNode nested;
 				do
 				{
 					nested = ReadNode();
-					if(nested != null)
-						node.Nodes.Add(nested);
+					node.Nodes.Add(nested);
 				} while (nested != null);
-				if (strict && stream.BaseStream.Position != endOffset)
+				if (errorLevel >= ErrorLevel.Checked && stream.BaseStream.Position != endOffset)
 					throw new FbxException(stream.BaseStream.Position,
 						"Too many bytes in node, end point is " + endOffset);
 			}
 			return node;
 		}
 
-		static bool CheckEqual(byte[] a, byte[] b)
-		{
-			if (a.Length != b.Length)
-				return false;
-			for(int i = 0; i < a.Length; i++)
-				if (a[i] != b[i])
-					return false;
-			return true;
-		}
+		
 
 		public FbxNode Read(out int version)
 		{
-			if (strict)
-			{
-                if (!CheckEqual(stream.ReadBytes(headerString.Length), headerString))
-					throw new FbxException(stream.BaseStream.Position - headerString.Length,
-						"Invalid header string");
-				if(stream.ReadInt16() != magic)
-					throw new FbxException(stream.BaseStream.Position - sizeof(short),
-						"Invalid magic number");
-			} else
-			{
-				stream.BaseStream.Position += headerString.Length + sizeof(short);
-			}
+			// Read header
+			bool validHeader = ReadHeader(stream.BaseStream);
+			if (errorLevel >= ErrorLevel.Strict && !validHeader)
+				throw new FbxException(stream.BaseStream.Position,
+					"Invalid header string");
 			version = stream.ReadInt32();
+
+			// Read nodes
 			var node = new FbxNode();
+			var dataPos = stream.BaseStream.Position;
 			FbxNode nested;
 			do
 			{
 				nested = ReadNode();
 				if(nested != null)
-					node.Nodes.Add(nested);
+					node.Nodes.Add(nested);;
 			} while (nested != null);
+
+			// Read footer code
+			var footerCode = new byte[footerCodeSize];
+			stream.BaseStream.Read(footerCode, 0, footerCode.Length);
+			if (errorLevel >= ErrorLevel.Strict)
+			{
+				var validCode = GenerateFooterCode(node, dataPos);
+				if(!CheckEqual(footerCode, validCode))
+					throw new FbxException(stream.BaseStream.Position - footerCodeSize,
+						"Incorrect footer code");
+			}
+
+			// Read footer extension
+			dataPos = stream.BaseStream.Position;
+			var validFooterExtension = CheckFooter(stream, version);
+			if(errorLevel >= ErrorLevel.Strict && !validFooterExtension)
+				throw new FbxException(dataPos, "Invalid footer");
+
 			// Account for existence top level node or not
 			if (node.Nodes.Count == 1 && node.Properties.Count == 0 && string.IsNullOrEmpty(node.Name))
 				node = node.Nodes[0];

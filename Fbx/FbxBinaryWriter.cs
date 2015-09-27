@@ -144,7 +144,8 @@ namespace Fbx
 			{
 				var name = string.IsNullOrEmpty(node.Name) ? null : Encoding.ASCII.GetBytes(node.Name);
 				if(name != null && name.Length > byte.MaxValue)
-					throw new ArgumentException("Node name '" + node.Name + "' is too long");
+					throw new FbxException(stream.BaseStream.Position,
+						"Node name '" + node.Name + "' is too long");
 
 				// Header
 				var endOffsetPos = stream.BaseStream.Position;
@@ -176,8 +177,8 @@ namespace Fbx
 							continue;
 						WriteNode(n);
 					}
+					WriteNode(null);
 				}
-				WriteNode(null);
 
 				// Write end offset
 				var dataEnd = stream.BaseStream.Position;
@@ -190,13 +191,14 @@ namespace Fbx
 		public void Write(FbxNode topLevel, int version = 7400)
 		{
 			stream.BaseStream.Position = 0;
-			stream.Write(headerString);
-			stream.Write(magic);
+			WriteHeader(stream.BaseStream);
 			stream.Write(version);
 			// TODO: Do we write a top level node or not? Maybe check the version?
 			foreach (var node in topLevel.Nodes)
 				WriteNode(node);
 			WriteNode(null);
+			stream.Write(GenerateFooterCode(topLevel, stream.BaseStream.Position));
+			WriteFooter(stream, version);
 			output.Write(memory.GetBuffer(), 0, (int)memory.Position);
 		}
 	}

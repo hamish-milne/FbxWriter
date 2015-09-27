@@ -7,8 +7,8 @@
     <ProjectGuid>{07A221AC-5238-4C77-96DE-E792C49D23E1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FbxWriter</RootNamespace>
-    <AssemblyName>FbxWriter</AssemblyName>
+    <RootNamespace>Fbx</RootNamespace>
+    <AssemblyName>Fbx</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DeflateWithChecksum.cs" />
+    <Compile Include="ErrorLevel.cs" />
     <Compile Include="FbxAsciiWriter.cs" />
     <Compile Include="FbxBinary.cs" />
     <Compile Include="FbxBinaryReader.cs" />
