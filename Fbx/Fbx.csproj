@@ -41,10 +41,13 @@
     <Compile Include="FbxBinary.cs" />
     <Compile Include="FbxBinaryReader.cs" />
     <Compile Include="FbxBinaryWriter.cs" />
+    <Compile Include="FbxDocument.cs" />
     <Compile Include="FbxException.cs" />
     <Compile Include="FbxNode.cs" />
     <Compile Include="FbxAsciiReader.cs" />
-    <Compile Include="FbxUtil.cs" />
+    <Compile Include="FbxIO.cs" />
+    <Compile Include="FbxNodeList.cs" />
+    <Compile Include="FbxVersion.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

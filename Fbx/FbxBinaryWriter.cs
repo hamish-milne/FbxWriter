@@ -57,7 +57,7 @@ namespace Fbx
 				{ typeof(long),   new WriterInfo('L', (sw, obj) => sw.Write((long)obj)) },
 				{ typeof(float),  new WriterInfo('F', (sw, obj) => sw.Write((float)obj)) },
 				{ typeof(double), new WriterInfo('D', (sw, obj) => sw.Write((double)obj)) },
-				{ typeof(bool),   new WriterInfo('C', (sw, obj) => sw.Write((bool)obj)) },
+				{ typeof(bool),   new WriterInfo('C', (sw, obj) => sw.Write((byte)(char)obj)) },
 				{ typeof(byte[]), new WriterInfo('R', WriteRaw) },
 				{ typeof(string), new WriterInfo('S', WriteString) },
 				// null elements indicate arrays - they are checked again with their element type
@@ -221,19 +221,18 @@ namespace Fbx
 		/// <summary>
 		/// Writes an FBX file to the output
 		/// </summary>
-		/// <param name="topLevel"></param>
-		/// <param name="version"></param>
-		public void Write(FbxNode topLevel, int version = 7400)
+		/// <param name="document"></param>
+		public void Write(FbxDocument document)
 		{
 			stream.BaseStream.Position = 0;
 			WriteHeader(stream.BaseStream);
-			stream.Write(version);
+			stream.Write((int)document.Version);
 			// TODO: Do we write a top level node or not? Maybe check the version?
-			foreach (var node in topLevel.Nodes)
+			foreach (var node in document.Nodes)
 				WriteNode(node);
 			WriteNode(null);
-			stream.Write(GenerateFooterCode(topLevel, stream.BaseStream.Position));
-			WriteFooter(stream, version);
+			stream.Write(GenerateFooterCode(document, stream.BaseStream.Position));
+			WriteFooter(stream, (int)document.Version);
 			output.Write(memory.GetBuffer(), 0, (int)memory.Position);
 		}
 	}

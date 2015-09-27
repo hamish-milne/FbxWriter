@@ -42,7 +42,7 @@ namespace Fbx
 				case 'Y':
 					return stream.ReadInt16();
 				case 'C':
-					return stream.ReadBoolean();
+					return (char)stream.ReadByte();
 				case 'I':
 					return stream.ReadInt32();
 				case 'F':
@@ -99,7 +99,7 @@ namespace Fbx
 			var endPos = stream.BaseStream.Position + compressedLen;
 			if (encoding != 0)
 			{
-				if(errorLevel >= ErrorLevel.Strict)
+				if(errorLevel >= ErrorLevel.Checked)
 				{
 					if(encoding != 1)
 						throw new FbxException(stream.BaseStream.Position - 1,
@@ -109,7 +109,7 @@ namespace Fbx
 						throw new FbxException(stream.BaseStream.Position - 1,
 							"Invalid compression format " + cmf);
 					var flg = stream.ReadByte();
-					if(((cmf << 8) + flg) % 31 != 0)
+					if(errorLevel >= ErrorLevel.Strict && ((cmf << 8) + flg) % 31 != 0)
 						throw new FbxException(stream.BaseStream.Position - 1,
 							"Invalid compression FCHECK");
 					if((flg & (1 << 5)) != 0)
@@ -210,7 +210,7 @@ namespace Fbx
 		/// <returns>The top-level node</returns>
 		/// <exception cref="FbxException">The FBX data was malformed
 		/// for the reader's error level</exception>
-		public FbxNode Read(out int version)
+		public FbxDocument Read(out int version)
 		{
 			// Read header
 			bool validHeader = ReadHeader(stream.BaseStream);
@@ -220,7 +220,7 @@ namespace Fbx
 			version = stream.ReadInt32();
 
 			// Read nodes
-			var node = new FbxNode();
+			var node = new FbxDocument();
 			var dataPos = stream.BaseStream.Position;
 			FbxNode nested;
 			do
@@ -246,10 +246,6 @@ namespace Fbx
 			var validFooterExtension = CheckFooter(stream, version);
 			if(errorLevel >= ErrorLevel.Strict && !validFooterExtension)
 				throw new FbxException(dataPos, "Invalid footer");
-
-			// Account for existence top level node or not
-			if (node.Nodes.Count == 1 && node.Properties.Count == 0 && string.IsNullOrEmpty(node.Name))
-				node = node.Nodes[0];
 			return node;
 		}
 	}

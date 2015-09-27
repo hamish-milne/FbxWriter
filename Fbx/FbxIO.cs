@@ -3,16 +3,18 @@
 namespace Fbx
 {
 	/// <summary>
-	/// Quick utility methods
+	/// Static read and write methods
 	/// </summary>
-	public static class FbxUtil
+	// IO is an acronym
+	// ReSharper disable once InconsistentNaming
+	public static class FbxIO
 	{
 		/// <summary>
 		/// Reads an FBX file
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns>The top level document node</returns>
-		public static FbxNode ReadBinary(string path)
+		public static FbxDocument ReadBinary(string path)
 		{
 			using (var stream = new FileStream(path, FileMode.Open))
 			{
@@ -27,7 +29,7 @@ namespace Fbx
 		/// </summary>
 		/// <param name="document">The top level document node</param>
 		/// <param name="path"></param>
-		public static void WriteBinary(FbxNode document, string path)
+		public static void WriteBinary(FbxDocument document, string path)
 		{
 			using (var stream = new FileStream(path, FileMode.Create))
 			{
@@ -41,7 +43,7 @@ namespace Fbx
 		/// </summary>
 		/// <param name="document">The top level document node</param>
 		/// <param name="path"></param>
-		public static void WriteAscii(FbxNode document, string path)
+		public static void WriteAscii(FbxDocument document, string path)
 		{
 			using (var stream = new FileStream(path, FileMode.Create))
 			{

@@ -93,7 +93,7 @@ namespace Fbx
 		/// <param name="document"></param>
 		/// <param name="dataPos"></param>
 		/// <returns>A 16-byte code</returns>
-		protected static byte[] GenerateFooterCode(FbxNode document, long dataPos)
+		protected static byte[] GenerateFooterCode(FbxNodeList document, long dataPos)
 		{
 			var timestamp = document.GetRelative("FBXHeaderExtension/CreationTimeStamp");
 			if (timestamp == null)

@@ -9,15 +9,8 @@ namespace Fbx
     {
         static void Main(string[] args)
         {
-			Console.WriteLine("Start");
-			var stream = new FileStream(args[0], FileMode.Open);
-	        int version;
-	        var node = (new FbxBinaryReader(stream)).Read(out version);
-			stream.Close();
-
-			stream = new FileStream(args[1], FileMode.Create);
-			(new FbxBinaryWriter(stream)).Write(node);
-			stream.Close();
+	        var document = FbxIO.ReadBinary(args[0]);
+			FbxIO.WriteAscii(document, Path.GetDirectoryName(args[0]) + "/test_ascii.fbx");
         }
     }
 }
