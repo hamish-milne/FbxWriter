@@ -1,5 +1,8 @@
 ﻿namespace Fbx
 {
+	/// <summary>
+	/// A top-level FBX node
+	/// </summary>
 	public class FbxDocument : FbxNodeList
 	{
 		/// <summary>

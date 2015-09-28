@@ -1,5 +1,8 @@
 ﻿namespace Fbx
 {
+	/// <summary>
+	/// Indicates when a reader should throw errors
+	/// </summary>
 	public enum ErrorLevel
 	{
 		/// <summary>

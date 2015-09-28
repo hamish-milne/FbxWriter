@@ -1,7 +1,7 @@
 # FBX manipulation for .NET
 
 - Read FBX binary files (**Done**)
-- Read FBX ASCII files (TODO)
+- Read FBX ASCII files (**Done**)
 - Write **fully compliant** FBX binary files (**Done**)
 - Write FBX ASCII files (**Done**)
 - Format detection (TODO)
@@ -17,7 +17,7 @@ class FbxExample
 	static void Main(string[] args)
 	{
 		// Read a file
-		var documentNode = FbxUtil.ReadBinary("MyModel.fbx");
+		var documentNode = FbxIO.ReadBinary("MyModel.fbx");
 		
 		// Update a property
 		documentNode["Creator"].Value = "My Application";
@@ -27,7 +27,7 @@ class FbxExample
 		writer.Write(documentNode);
 		
 		// Write the updated binary
-		FbxUtil.WriteBinary(documentNode, "MyModel_patched.fbx");
+		FbxIO.WriteBinary(documentNode, "MyModel_patched.fbx");
 	}
 }
 ```
