@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Fbx
 {
@@ -10,16 +11,22 @@ namespace Fbx
 	public class FbxAsciiReader
 	{
 		private readonly Stream stream;
+		private readonly ErrorLevel errorLevel;
+
+		private int line = 1;
+		private int column = 1;
 
 		/// <summary>
 		/// Creates a new reader
 		/// </summary>
 		/// <param name="stream"></param>
-		public FbxAsciiReader(Stream stream)
+		/// <param name="errorLevel"></param>
+		public FbxAsciiReader(Stream stream, ErrorLevel errorLevel = ErrorLevel.Checked)
 		{
 			if(stream == null)
 				throw new ArgumentNullException(nameof(stream));
 			this.stream = stream;
+			this.errorLevel = errorLevel;
 		}
 
 		/// <summary>
@@ -38,6 +45,7 @@ namespace Fbx
 		readonly byte[] singleChar = new byte[1];
 		private char? prevChar;
 		private bool endStream;
+		private bool wasCr;
 
 		// Reads a char, allows peeking and checks for end of stream
 		char ReadChar()
@@ -53,7 +61,25 @@ namespace Fbx
 				endStream = true;
 				return '\0';
 			}
-			return (char)singleChar[0];
+			var ch = (char)singleChar[0];
+			// Handle line and column numbers here;
+			// This isn't terribly accurate, but good enough for diagnostics
+			if (ch == '\r')
+			{
+				wasCr = true;
+				line++;
+				column = 0;
+			} else
+			{
+				if (ch == '\n' && !wasCr)
+				{
+					line++;
+					column = 0;
+				}
+				wasCr = false;
+			}
+			column++;
+			return ch;
 		}
 
 		// Checks if a character is valid in a real number
@@ -84,6 +110,10 @@ namespace Fbx
 		// Token to mark the end of the stream
 		class EndOfStream
 		{
+			public override string ToString()
+			{
+				return "end of stream";
+			}
 		}
 
 		// Wrapper around a string to mark it as an identifier
@@ -108,6 +138,11 @@ namespace Fbx
 			public Identifier(string str)
 			{
 				String = str;
+			}
+
+			public override string ToString()
+			{
+				return String + ":";
 			}
 		}
 
@@ -142,7 +177,7 @@ namespace Fbx
 					while((c = ReadChar()) != '"')
 					{
 						if (endStream)
-							throw new FbxException(stream.Position,
+							throw new FbxException(line, column,
 								"Unexpected end of stream; expecting end quote");
 						sb1.Append(c);
 					}
@@ -169,16 +204,25 @@ namespace Fbx
 						var str = sb2.ToString();
 						if (str.Contains("."))
 						{
-							// TODO: Separate float and double
-							double d;
-							if (!double.TryParse(str, out d))
-								throw new FbxException(stream.Position,
-									"Invalid number");
-							return d;
+							if (str.Split('.', 'e', 'E')[1].Length > 6)
+							{
+								double d;
+								if (!double.TryParse(str, out d))
+									throw new FbxException(line, column,
+										"Invalid number");
+								return d;
+							} else
+							{
+								float f;
+								if (!float.TryParse(str, out f))
+									throw new FbxException(line, column,
+										"Invalid number");
+								return f;
+							}
 						}
 						long l;
 						if (!long.TryParse(str, out l))
-							throw new FbxException(stream.Position,
+							throw new FbxException(line, column,
 								"Invalid integer");
 						// Check size and return the smallest possible
 						if (l >= byte.MinValue && l <= byte.MaxValue)
@@ -201,7 +245,7 @@ namespace Fbx
 					}
 					break;
 			}
-			throw new FbxException(stream.Position,
+			throw new FbxException(line, column,
 				"Unknown character " + c);
 		}
 
@@ -234,8 +278,8 @@ namespace Fbx
 				if (!':'.Equals(colon))
 				{
 					if (id.String.Length > 1)
-						throw new FbxException(stream.Position,
-							"Unexpected " + colon + ", expected ':' or a single-char literal");
+						throw new FbxException(line, column,
+							"Unexpected '" + colon + "', expected ':' or a single-char literal");
 					ret = id.String[0];
 					prevTokenSingle = colon;
 				}
@@ -246,9 +290,9 @@ namespace Fbx
 		void ExpectToken(object token)
 		{
 			var t = ReadToken();
-            if (!token.Equals(t))
-				throw new FbxException(stream.Position,
-					"Unexpected " + t + ", expected " + token);
+			if (!token.Equals(t))
+				throw new FbxException(line, column,
+					"Unexpected '" + t + "', expected " + token);
 		}
 
 		private enum ArrayType
@@ -257,6 +301,7 @@ namespace Fbx
 			Int = 1,
 			Long = 2,
 			Float = 3,
+			Double = 4,
 		};
 
 		Array ReadArray()
@@ -271,13 +316,13 @@ namespace Fbx
 			else if (len is byte)
 				l = (byte) len;
 			else
-				throw new FbxException(stream.Position,
-					"Unexpected " + len + ", expected an integer");
+				throw new FbxException(line, column,
+					"Unexpected '" + len + "', expected an integer");
 			if(l < 0)
-				throw new FbxException(stream.Position,
+				throw new FbxException(line, column,
 					"Invalid array length " + l);
 			if(l > MaxArrayLength)
-				throw new FbxException(stream.Position,
+				throw new FbxException(line, column,
 					"Array length " + l + " higher than permitted maximum " + MaxArrayLength);
 			ExpectToken('{');
 			ExpectToken(new Identifier("a"));
@@ -293,48 +338,58 @@ namespace Fbx
 				if (expectComma)
 				{
 					if (!','.Equals(token))
-						throw new FbxException(stream.Position,
-							"Unexpected " + token + ", expected a ','");
+						throw new FbxException(line, column,
+							"Unexpected '" + token + "', expected ','");
 					expectComma = false;
 					continue;
 				}
 				if(pos >= array.Length)
-					throw new FbxException(stream.Position,
-						"Too many elements in array");
+				{
+					if(errorLevel >= ErrorLevel.Checked)
+						throw new FbxException(line, column,
+							"Too many elements in array");
+					continue;
+				}
 
 				// Add element to the array, checking for the maximum
 				// size of any one element.
 				// (I'm not sure if this is the 'correct' way to do it, but it's the only
 				// logical one given the nature of the ASCII format)
-				bool isDouble = token is double;
 				double d;
-				if (!isDouble)
+				if (token is byte)
 				{
-					if (token is byte)
-					{
-						d = (byte) token;
-					} else if (token is int)
-					{
-						d = (int) token;
-						if(arrayType < ArrayType.Int)
-							arrayType = ArrayType.Int;
-					} else if (token is long)
-					{
-						d = (long) token;
-						if (arrayType < ArrayType.Long)
-							arrayType = ArrayType.Long;
-					} else
-						throw new FbxException(stream.Position,
-								"Unexpected " + token + ", expected a number");
-				} else
+					d = (byte) token;
+				} else if (token is int)
 				{
-					d = (double) token;
-					if (arrayType < ArrayType.Float)
-						arrayType = ArrayType.Float;
+					d = (int) token;
+					if(arrayType < ArrayType.Int)
+						arrayType = ArrayType.Int;
+				} else if (token is long)
+				{
+					d = (long) token;
+					if (arrayType < ArrayType.Long)
+						arrayType = ArrayType.Long;
+				} else if (token is float)
+				{
+					d = (float) token;
+					// A long can't be accurately represented by a float
+					arrayType = arrayType < ArrayType.Long
+						? ArrayType.Float : ArrayType.Double;
 				}
+				else if (token is double)
+				{
+					d = (double)token;
+					if (arrayType < ArrayType.Double)
+						arrayType = ArrayType.Double;
+				} else
+					throw new FbxException(line, column,
+							"Unexpected '" + token + "', expected a number");
 				array[pos++] = d;
 				expectComma = true;
 			}
+			if(pos < array.Length && errorLevel >= ErrorLevel.Checked)
+				throw new FbxException(line, column,
+					"Too few elements in array - expected " + (array.Length - pos) + " more");
 			
 			// Convert the array to the smallest type we can see
 			Array ret;
@@ -347,16 +402,22 @@ namespace Fbx
 					ret = bArray;
 					break;
 				case ArrayType.Int:
-					var intArray = new int[array.Length];
-					for (int i = 0; i < intArray.Length; i++)
-						intArray[i] = (int)array[i];
-					ret = intArray;
+					var iArray = new int[array.Length];
+					for (int i = 0; i < iArray.Length; i++)
+						iArray[i] = (int)array[i];
+					ret = iArray;
 					break;
 				case ArrayType.Long:
 					var lArray = new long[array.Length];
 					for (int i = 0; i < lArray.Length; i++)
 						lArray[i] = (long)array[i];
 					ret = lArray;
+					break;
+				case ArrayType.Float:
+					var fArray = new float[array.Length];
+					for (int i = 0; i < fArray.Length; i++)
+						fArray[i] = (long)array[i];
+					ret = fArray;
 					break;
 				default:
 					ret = array;
@@ -377,7 +438,8 @@ namespace Fbx
 			{
 				if (first is EndOfStream)
 					return null;
-				throw new FbxException(stream.Position, "Expected an identifier");
+				throw new FbxException(line, column,
+					"Unexpected '" + first + "', expected an identifier");
 			}
 			var node = new FbxNode {Name = id.String};
 
@@ -389,8 +451,8 @@ namespace Fbx
 				if (expectComma)
 				{
 					if (!','.Equals(token)) 
-						throw new FbxException(stream.Position,
-							"Unexpected " + token + ", expected a ','");
+						throw new FbxException(line, column,
+							"Unexpected '" + token + "', expected a ','");
 					expectComma = false;
 					continue;
 				}
@@ -405,8 +467,8 @@ namespace Fbx
 						case '}':
 						case ':':
 						case ',':
-							throw new FbxException(stream.Position,
-								"Unexpected " + c + " in property list");
+							throw new FbxException(line, column,
+								"Unexpected '" + c + "' in property list");
 					}
 				}
 				node.Properties.Add(token);
@@ -438,12 +500,35 @@ namespace Fbx
 		public FbxDocument Read()
 		{
 			var ret = new FbxDocument();
-			// TODO: Read version string
+
+			// Read version string
+			const string versionString = @"; FBX (\d)\.(\d)\.(\d) project file";
+            char c;
+			while(char.IsWhiteSpace(c = ReadChar()) && !endStream) { } // Skip whitespace
+			bool hasVersionString = false;
+			if (c == ';')
+			{
+				var sb = new StringBuilder();
+				do
+				{
+					sb.Append(c);
+				} while (!IsLineEnd(c = ReadChar()) && !endStream);
+				var match = Regex.Match(sb.ToString(), versionString);
+				hasVersionString = match.Success;
+				if(hasVersionString)
+					ret.Version = (FbxVersion)(
+						int.Parse(match.Groups[1].Value)*1000 +
+						int.Parse(match.Groups[2].Value)*100 +
+						int.Parse(match.Groups[3].Value)*10
+					);
+			}
+			if(!hasVersionString && errorLevel >= ErrorLevel.Strict)
+				throw new FbxException(line, column,
+					"Invalid version string; first line must match \"" + versionString + "\"");
 			FbxNode node;
 			while((node = ReadNode()) != null)
 				ret.Nodes.Add(node);
 			return ret;
 		}
-
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -27,13 +28,27 @@ namespace Fbx
 		// Number of null bytes between the footer version and extension code
 		private const int footerZeroes2 = 120;
 
+		/// <summary>
+		/// The size of the footer code
+		/// </summary>
 		protected const int footerCodeSize = 16;
 
-		// This is used by the binary format instead of '::', and the component tokens are reversed
+		/// <summary>
+		/// The namespace separator in the binary format (remember to reverse the identifiers)
+		/// </summary>
 		protected const string binarySeparator = "\0\x1";
+
+		/// <summary>
+		/// The namespace separator in the ASCII format and in object data
+		/// </summary>
 		protected const string asciiSeparator = "::";
 
-		// Checks if the first part of 'data' matches 'original'
+		/// <summary>
+		/// Checks if the first part of 'data' matches 'original'
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="original"></param>
+		/// <returns><c>true</c> if it does, otherwise <c>false</c></returns>
 		protected static bool CheckEqual(byte[] data, byte[] original)
 		{
 			for (int i = 0; i < original.Length; i++)
@@ -74,8 +89,12 @@ namespace Fbx
 			}
 		}
 
+		const string timePath1 = "FBXHeaderExtension";
+		const string timePath2 = "CreationTimeStamp";
+		static readonly Stack<string> timePath = new Stack<string>(new[] { timePath1, timePath2 });
+
 		// Gets a single timestamp component
-		static int GetTimestampVar(FbxNode timestamp, long dataPos, string element)
+		static int GetTimestampVar(FbxNode timestamp, string element)
 		{
 			var elementNode = timestamp[element];
 			if (elementNode != null && elementNode.Properties.Count > 0)
@@ -84,35 +103,34 @@ namespace Fbx
 				if (prop is int || prop is long)
 					return (int)prop;
 			}
-			throw new FbxException(dataPos, "Timestamp has no " + element);
+			throw new FbxException(timePath, -1, "Timestamp has no " + element);
 		}
 
 		/// <summary>
 		/// Generates the unique footer code based on the document's timestamp
 		/// </summary>
 		/// <param name="document"></param>
-		/// <param name="dataPos"></param>
 		/// <returns>A 16-byte code</returns>
-		protected static byte[] GenerateFooterCode(FbxNodeList document, long dataPos)
+		protected static byte[] GenerateFooterCode(FbxNodeList document)
 		{
-			var timestamp = document.GetRelative("FBXHeaderExtension/CreationTimeStamp");
+			var timestamp = document.GetRelative(timePath1 + "/" + timePath2);
 			if (timestamp == null)
-				throw new FbxException(dataPos, "No creation timestamp");
+				throw new FbxException(timePath, -1, "No creation timestamp");
 			try
 			{
 				return GenerateFooterCode(
-					GetTimestampVar(timestamp, dataPos, "Year"),
-					GetTimestampVar(timestamp, dataPos, "Month"),
-					GetTimestampVar(timestamp, dataPos, "Day"),
-					GetTimestampVar(timestamp, dataPos, "Hour"),
-					GetTimestampVar(timestamp, dataPos, "Minute"),
-					GetTimestampVar(timestamp, dataPos, "Second"),
-					GetTimestampVar(timestamp, dataPos, "Millisecond")
+					GetTimestampVar(timestamp, "Year"),
+					GetTimestampVar(timestamp, "Month"),
+					GetTimestampVar(timestamp, "Day"),
+					GetTimestampVar(timestamp, "Hour"),
+					GetTimestampVar(timestamp, "Minute"),
+					GetTimestampVar(timestamp, "Second"),
+					GetTimestampVar(timestamp, "Millisecond")
 					);
 			}
 			catch (ArgumentOutOfRangeException)
 			{
-				throw new FbxException(dataPos, "Invalid timestamp");
+				throw new FbxException(timePath, -1, "Invalid timestamp");
 			}
 		}
 
@@ -183,13 +201,13 @@ namespace Fbx
 		/// <param name="stream"></param>
 		/// <param name="version"></param>
 		/// <returns><c>true</c> if it's compliant</returns>
-		protected bool CheckFooter(BinaryReader stream, int version)
+		protected bool CheckFooter(BinaryReader stream, FbxVersion version)
 		{
 			var buffer = new byte[Math.Max(footerZeroes1, footerZeroes2)];
 			stream.Read(buffer, 0, footerZeroes1);
 			bool correct = AllZero(buffer);
 			var readVersion = stream.ReadInt32();
-			correct &= (readVersion == version);
+			correct &= (readVersion == (int)version);
 			stream.Read(buffer, 0, footerZeroes2);
 			correct &= AllZero(buffer);
 			stream.Read(buffer, 0, extension.Length);

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Fbx
 {
@@ -10,17 +11,34 @@ namespace Fbx
 	public static class FbxIO
 	{
 		/// <summary>
-		/// Reads an FBX file
+		/// Reads a binary FBX file
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns>The top level document node</returns>
 		public static FbxDocument ReadBinary(string path)
 		{
+			if(path == null)
+				throw new ArgumentNullException(nameof(path));
 			using (var stream = new FileStream(path, FileMode.Open))
 			{
 				var reader = new FbxBinaryReader(stream);
-				int version;
-				return reader.Read(out version);
+				return reader.Read();
+			}
+		}
+
+		/// <summary>
+		/// Reads an ASCII FBX file
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns>The top level document node</returns>
+		public static FbxDocument ReadAscii(string path)
+		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
+			using (var stream = new FileStream(path, FileMode.Open))
+			{
+				var reader = new FbxAsciiReader(stream);
+				return reader.Read();
 			}
 		}
 
@@ -31,6 +49,8 @@ namespace Fbx
 		/// <param name="path"></param>
 		public static void WriteBinary(FbxDocument document, string path)
 		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
 			using (var stream = new FileStream(path, FileMode.Create))
 			{
 				var writer = new FbxBinaryWriter(stream);
@@ -45,6 +65,8 @@ namespace Fbx
 		/// <param name="path"></param>
 		public static void WriteAscii(FbxDocument document, string path)
 		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
 			using (var stream = new FileStream(path, FileMode.Create))
 			{
 				var writer = new FbxAsciiWriter(stream);

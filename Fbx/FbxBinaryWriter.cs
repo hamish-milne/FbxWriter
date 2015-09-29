@@ -16,6 +16,8 @@ namespace Fbx
 		private readonly MemoryStream memory;
 		private readonly BinaryWriter stream;
 
+		readonly Stack<string> nodePath = new Stack<string>(); 
+
 		/// <summary>
 		/// The minimum size of an array in bytes before it is compressed
 		/// </summary>
@@ -32,7 +34,7 @@ namespace Fbx
 			output = stream;
 			// Wrap in a memory stream to guarantee seeking
 			memory = new MemoryStream();
-            this.stream = new BinaryWriter(memory, Encoding.ASCII);
+			this.stream = new BinaryWriter(memory, Encoding.ASCII);
 		}
 
 		private delegate void PropertyWriter(BinaryWriter sw, object obj);
@@ -52,7 +54,7 @@ namespace Fbx
 		private static readonly Dictionary<Type, WriterInfo> writePropertyActions
 			= new Dictionary<Type, WriterInfo>
 			{
-				{ typeof(int),    new WriterInfo('I', (sw, obj) => sw.Write((int)obj)) },
+				{ typeof(int),	new WriterInfo('I', (sw, obj) => sw.Write((int)obj)) },
 				{ typeof(short),  new WriterInfo('Y', (sw, obj) => sw.Write((short)obj)) },
 				{ typeof(long),   new WriterInfo('L', (sw, obj) => sw.Write((long)obj)) },
 				{ typeof(float),  new WriterInfo('F', (sw, obj) => sw.Write((float)obj)) },
@@ -61,7 +63,7 @@ namespace Fbx
 				{ typeof(byte[]), new WriterInfo('R', WriteRaw) },
 				{ typeof(string), new WriterInfo('S', WriteString) },
 				// null elements indicate arrays - they are checked again with their element type
-				{ typeof(int[]),    new WriterInfo('i', null) },
+				{ typeof(int[]),	new WriterInfo('i', null) },
 				{ typeof(long[]),   new WriterInfo('l', null) },
 				{ typeof(float[]),  new WriterInfo('f', null) },
 				{ typeof(double[]), new WriterInfo('d', null) },
@@ -93,7 +95,7 @@ namespace Fbx
 				}
 				str = sb.ToString();
 			}
-            var bytes = Encoding.ASCII.GetBytes(str);
+			var bytes = Encoding.ASCII.GetBytes(str);
 			stream.Write(bytes.Length);
 			stream.Write(bytes);
 		}
@@ -103,7 +105,7 @@ namespace Fbx
 			stream.Write(array.Length);
 			
 			var size = array.Length*Marshal.SizeOf(elementType);
-            bool compress = size >= CompressionThreshold;
+			bool compress = size >= CompressionThreshold;
 			stream.Write(compress ? 1 : 0);
 
 			var sw = stream;
@@ -144,19 +146,20 @@ namespace Fbx
 			}
 		}
 
-		void WriteProperty(object obj)
+		void WriteProperty(object obj, int id)
 		{
 			if (obj == null)
 				return;
 			WriterInfo writerInfo;
 			if(!writePropertyActions.TryGetValue(obj.GetType(), out writerInfo))
-				throw new ArgumentException("Invalid property type " + obj.GetType());
+				throw new FbxException(nodePath, id,
+					"Invalid property type " + obj.GetType());
 			stream.Write((byte)writerInfo.id);
 			// ReSharper disable once AssignNullToNotNullAttribute
 			if (writerInfo.writer == null) // Array type
 			{
 				var elementType = obj.GetType().GetElementType();
-                WriteArray((Array) obj, elementType, writePropertyActions[elementType].writer);
+				WriteArray((Array) obj, elementType, writePropertyActions[elementType].writer);
 			} else
 				writerInfo.writer(stream, obj);
 		}
@@ -172,10 +175,11 @@ namespace Fbx
 				stream.BaseStream.Write(nullData, 0, nullData.Length);
 			} else
 			{
+				nodePath.Push(node.Name ?? "");
 				var name = string.IsNullOrEmpty(node.Name) ? null : Encoding.ASCII.GetBytes(node.Name);
 				if(name != null && name.Length > byte.MaxValue)
 					throw new FbxException(stream.BaseStream.Position,
-						"Node name '" + node.Name + "' is too long");
+						"Node name is too long");
 
 				// Header
 				var endOffsetPos = stream.BaseStream.Position;
@@ -189,9 +193,9 @@ namespace Fbx
 
 				// Write properties and length
 				var propertyBegin = stream.BaseStream.Position;
-				foreach (var p in node.Properties)
+				for(int i = 0; i < node.Properties.Count; i++)
 				{
-					WriteProperty(p);
+					WriteProperty(node.Properties[i], i);
 				}
 				var propertyEnd = stream.BaseStream.Position;
 				stream.BaseStream.Position = propertyLengthPos;
@@ -215,6 +219,8 @@ namespace Fbx
 				stream.BaseStream.Position = endOffsetPos;
 				stream.Write((int)dataEnd);
 				stream.BaseStream.Position = dataEnd;
+
+				nodePath.Pop();
 			}
 		}
 
@@ -228,10 +234,11 @@ namespace Fbx
 			WriteHeader(stream.BaseStream);
 			stream.Write((int)document.Version);
 			// TODO: Do we write a top level node or not? Maybe check the version?
+			nodePath.Clear();
 			foreach (var node in document.Nodes)
 				WriteNode(node);
 			WriteNode(null);
-			stream.Write(GenerateFooterCode(document, stream.BaseStream.Position));
+			stream.Write(GenerateFooterCode(document));
 			WriteFooter(stream, (int)document.Version);
 			output.Write(memory.GetBuffer(), 0, (int)memory.Position);
 		}

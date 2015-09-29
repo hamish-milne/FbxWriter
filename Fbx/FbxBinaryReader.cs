@@ -37,7 +37,7 @@ namespace Fbx
 		object ReadProperty()
 		{
 			var dataType = (char) stream.ReadByte();
-            switch (dataType)
+			switch (dataType)
 			{
 				case 'Y':
 					return stream.ReadInt16();
@@ -63,7 +63,7 @@ namespace Fbx
 					return ReadArray(br => br.ReadBoolean(), typeof(bool));
 				case 'S':
 					var len = stream.ReadInt32();
-                    var str = len == 0 ? "" : Encoding.ASCII.GetString(stream.ReadBytes(len));
+					var str = len == 0 ? "" : Encoding.ASCII.GetString(stream.ReadBytes(len));
 					// Convert \0\1 to '::' and reverse the tokens
 					if (str.Contains(binarySeparator))
 					{
@@ -115,7 +115,7 @@ namespace Fbx
 					if((flg & (1 << 5)) != 0)
 						throw new FbxException(stream.BaseStream.Position - 1,
 							"Invalid compression flags; dictionary not supported");
-                } else
+				} else
 				{
 					stream.BaseStream.Position += 2;
 				}
@@ -130,7 +130,7 @@ namespace Fbx
 			catch (InvalidDataException)
 			{
 				throw new FbxException(stream.BaseStream.Position - 1,
-                    "Compressed data was malformed");
+					"Compressed data was malformed");
 			}
 			if (encoding != 0)
 			{
@@ -154,14 +154,22 @@ namespace Fbx
 			return ret;
 		}
 
-		// Reads a single node
-		FbxNode ReadNode()
+		/// <summary>
+		/// Reads a single node.
+		/// </summary>
+		/// <remarks>
+		/// This won't read the file header or footer, and as such will fail if the stream is a full FBX file
+		/// </remarks>
+		/// <returns>The node</returns>
+		/// <exception cref="FbxException">The FBX data was malformed
+		/// for the reader's error level</exception>
+		public FbxNode ReadNode()
 		{
 			var endOffset = stream.ReadInt32();
 			var numProperties = stream.ReadInt32();
 			var propertyListLen = stream.ReadInt32();
 			var nameLen = stream.ReadByte();
-            var name = nameLen == 0 ? "" : Encoding.ASCII.GetString(stream.ReadBytes(nameLen));
+			var name = nameLen == 0 ? "" : Encoding.ASCII.GetString(stream.ReadBytes(nameLen));
 
 			if (endOffset == 0)
 			{
@@ -206,28 +214,26 @@ namespace Fbx
 		/// <summary>
 		/// Reads an FBX document from the stream
 		/// </summary>
-		/// <param name="version">The file's reported version number</param>
 		/// <returns>The top-level node</returns>
 		/// <exception cref="FbxException">The FBX data was malformed
 		/// for the reader's error level</exception>
-		public FbxDocument Read(out int version)
+		public FbxDocument Read()
 		{
 			// Read header
 			bool validHeader = ReadHeader(stream.BaseStream);
 			if (errorLevel >= ErrorLevel.Strict && !validHeader)
 				throw new FbxException(stream.BaseStream.Position,
 					"Invalid header string");
-			version = stream.ReadInt32();
+			var document = new FbxDocument {Version = (FbxVersion) stream.ReadInt32()};
 
 			// Read nodes
-			var node = new FbxDocument();
 			var dataPos = stream.BaseStream.Position;
 			FbxNode nested;
 			do
 			{
 				nested = ReadNode();
 				if(nested != null)
-					node.Nodes.Add(nested);
+					document.Nodes.Add(nested);
 			} while (nested != null);
 
 			// Read footer code
@@ -235,7 +241,7 @@ namespace Fbx
 			stream.BaseStream.Read(footerCode, 0, footerCode.Length);
 			if (errorLevel >= ErrorLevel.Strict)
 			{
-				var validCode = GenerateFooterCode(node, dataPos);
+				var validCode = GenerateFooterCode(document);
 				if(!CheckEqual(footerCode, validCode))
 					throw new FbxException(stream.BaseStream.Position - footerCodeSize,
 						"Incorrect footer code");
@@ -243,10 +249,10 @@ namespace Fbx
 
 			// Read footer extension
 			dataPos = stream.BaseStream.Position;
-			var validFooterExtension = CheckFooter(stream, version);
+			var validFooterExtension = CheckFooter(stream, document.Version);
 			if(errorLevel >= ErrorLevel.Strict && !validFooterExtension)
 				throw new FbxException(dataPos, "Invalid footer");
-			return node;
+			return document;
 		}
 	}
 }
