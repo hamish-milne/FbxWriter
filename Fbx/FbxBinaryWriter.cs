@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
@@ -59,7 +59,7 @@ namespace Fbx
 				{ typeof(long),   new WriterInfo('L', (sw, obj) => sw.Write((long)obj)) },
 				{ typeof(float),  new WriterInfo('F', (sw, obj) => sw.Write((float)obj)) },
 				{ typeof(double), new WriterInfo('D', (sw, obj) => sw.Write((double)obj)) },
-				{ typeof(bool),   new WriterInfo('C', (sw, obj) => sw.Write((byte)(char)obj)) },
+				{ typeof(char),   new WriterInfo('C', (sw, obj) => sw.Write((byte)(char)obj)) },
 				{ typeof(byte[]), new WriterInfo('R', WriteRaw) },
 				{ typeof(string), new WriterInfo('S', WriteString) },
 				// null elements indicate arrays - they are checked again with their element type
