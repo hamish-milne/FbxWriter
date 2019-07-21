@@ -59,7 +59,7 @@ namespace Fbx
 				{ typeof(long),   new WriterInfo('L', (sw, obj) => sw.Write((long)obj)) },
 				{ typeof(float),  new WriterInfo('F', (sw, obj) => sw.Write((float)obj)) },
 				{ typeof(double), new WriterInfo('D', (sw, obj) => sw.Write((double)obj)) },
-				{ typeof(bool),   new WriterInfo('C', (sw, obj) => sw.Write((byte)(char)obj)) },
+				{ typeof(char),   new WriterInfo('C', (sw, obj) => sw.Write((byte)(char)obj)) },
 				{ typeof(byte[]), new WriterInfo('R', WriteRaw) },
 				{ typeof(string), new WriterInfo('S', WriteString) },
 				// null elements indicate arrays - they are checked again with their element type
@@ -166,13 +166,15 @@ namespace Fbx
 
 		// Data for a null node
 		static readonly byte[] nullData = new byte[13];
+		static readonly byte[] nullData7500 = new byte[25];
 
 		// Writes a single document to the buffer
-		void WriteNode(FbxNode node)
+		void WriteNode(FbxDocument document, FbxNode node)
 		{
 			if (node == null)
 			{
-				stream.BaseStream.Write(nullData, 0, nullData.Length);
+				var data = document.Version >= FbxVersion.v7_5 ? nullData7500 : nullData;
+				stream.BaseStream.Write(data, 0, data.Length);
 			} else
 			{
 				nodePath.Push(node.Name ?? "");
@@ -183,10 +185,22 @@ namespace Fbx
 
 				// Header
 				var endOffsetPos = stream.BaseStream.Position;
-				stream.Write(0); // End offset placeholder
-				stream.Write(node.Properties.Count);
-				var propertyLengthPos = stream.BaseStream.Position;
-				stream.Write(0); // Property length placeholder
+				long propertyLengthPos;
+				if (document.Version >= FbxVersion.v7_5)
+				{
+					stream.Write((long)0); // End offset placeholder
+					stream.Write((long)node.Properties.Count);
+					propertyLengthPos = stream.BaseStream.Position;
+					stream.Write((long)0); // Property length placeholder
+				}
+				else
+				{
+					stream.Write(0); // End offset placeholder
+					stream.Write(node.Properties.Count);
+					propertyLengthPos = stream.BaseStream.Position;
+					stream.Write(0); // Property length placeholder
+				}
+
 				stream.Write((byte)(name?.Length ?? 0));
 				if(name != null)
 					stream.Write(name);
@@ -199,7 +213,10 @@ namespace Fbx
 				}
 				var propertyEnd = stream.BaseStream.Position;
 				stream.BaseStream.Position = propertyLengthPos;
-				stream.Write((int)(propertyEnd - propertyBegin));
+				if (document.Version >= FbxVersion.v7_5)
+					stream.Write((long)(propertyEnd - propertyBegin));
+				else
+					stream.Write((int)(propertyEnd - propertyBegin));
 				stream.BaseStream.Position = propertyEnd;
 
 				// Write child nodes
@@ -209,15 +226,18 @@ namespace Fbx
 					{
 						if(n == null)
 							continue;
-						WriteNode(n);
+						WriteNode(document, n);
 					}
-					WriteNode(null);
+					WriteNode(document, null);
 				}
 
 				// Write end offset
 				var dataEnd = stream.BaseStream.Position;
 				stream.BaseStream.Position = endOffsetPos;
-				stream.Write((int)dataEnd);
+				if (document.Version >= FbxVersion.v7_5)
+					stream.Write((long)dataEnd);
+				else
+					stream.Write((int)dataEnd);
 				stream.BaseStream.Position = dataEnd;
 
 				nodePath.Pop();
@@ -236,8 +256,8 @@ namespace Fbx
 			// TODO: Do we write a top level node or not? Maybe check the version?
 			nodePath.Clear();
 			foreach (var node in document.Nodes)
-				WriteNode(node);
-			WriteNode(null);
+				WriteNode(document, node);
+			WriteNode(document, null);
 			stream.Write(GenerateFooterCode(document));
 			WriteFooter(stream, (int)document.Version);
 			output.Write(memory.GetBuffer(), 0, (int)memory.Position);
