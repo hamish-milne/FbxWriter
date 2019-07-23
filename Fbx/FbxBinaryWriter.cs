@@ -112,7 +112,7 @@ namespace Fbx
 			DeflateWithChecksum codec = null;
 
 			var compressLengthPos = stream.BaseStream.Position;
-			stream.Write(0); // Placeholder compressed length
+			stream.Write(size); // Placeholder compressed length
 			var dataStart = stream.BaseStream.Position;
 			if (compress)
 			{
