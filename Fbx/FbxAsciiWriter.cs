@@ -10,6 +10,8 @@ namespace Fbx
 	/// </summary>
 	public class FbxAsciiWriter
 	{
+		private const string Divider = "; ----------------------------------------------------\n\n";
+		
 		private readonly Stream stream;
 
 		/// <summary>
@@ -141,7 +143,8 @@ namespace Fbx
 			var vMajor = (int)document.Version/1000;
 			var vMinor = ((int) document.Version%1000)/100;
 			var vRev = ((int) document.Version%100)/10;
-			sb.Append($"; FBX {vMajor}.{vMinor}.{vRev} project file\n\n");
+			sb.Append($"; FBX {vMajor}.{vMinor}.{vRev} project file\n");
+			sb.Append(Divider);
 
 			nodePath.Clear();
 			foreach (var n in document.Nodes)
