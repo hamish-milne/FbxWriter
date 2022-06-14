@@ -10,7 +10,8 @@ namespace Fbx
 	/// </summary>
 	public class FbxAsciiWriter
 	{
-		private const string Divider = "; ----------------------------------------------------\n\n";
+		private const string Comment = "; {0}\n";
+		private const string Divider = "; ----------------------------------------------------\n";
 		
 		private readonly Stream stream;
 
@@ -39,6 +40,17 @@ namespace Fbx
 		// Adds the given node text to the string
 		void BuildString(FbxNode node, StringBuilder sb, bool writeArrayLength, int indentLevel = 0)
 		{
+			// Comments are nodes that are there purely for organizing the ASCII file.
+			if (node is FbxComment comment)
+			{
+				sb.Append(string.Format(Comment, comment.Name));
+				
+				if (comment.HasDivider)
+					sb.Append(Divider);
+				
+				return;
+			}
+			
 			nodePath.Push(node.Name ?? "");
 			int lineStart = sb.Length;
 			// Write identifier
@@ -144,7 +156,7 @@ namespace Fbx
 			var vMinor = ((int) document.Version%1000)/100;
 			var vRev = ((int) document.Version%100)/10;
 			sb.Append($"; FBX {vMajor}.{vMinor}.{vRev} project file\n");
-			sb.Append(Divider);
+			sb.Append(Divider + "\n");
 
 			nodePath.Clear();
 			foreach (var n in document.Nodes)

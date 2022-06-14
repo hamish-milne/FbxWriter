@@ -38,6 +38,12 @@ namespace Fbx
 			return node;
 		}
 
+		public void AddComment(string text, bool hasDivider = false)
+		{
+			FbxComment comment = new FbxComment { Name = text, HasDivider = hasDivider };
+			Nodes.Add(comment);
+		}
+
 		/// <summary>
 		/// Gets a child node, using a '/' separated path
 		/// </summary>
