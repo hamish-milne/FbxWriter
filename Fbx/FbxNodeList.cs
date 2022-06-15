@@ -32,6 +32,14 @@ namespace Fbx
 		/// <returns></returns>
 		public FbxNode Add(string name, object value = null, params object[] properties)
 		{
+			// Allow a null node to be added, this is useful for specifying that a node usually has children but
+			// currently doesn't.
+			if (string.IsNullOrEmpty(name))
+			{
+				Nodes.Add(null);
+				return null;
+			}
+			
 			FbxNode node = new FbxNode { Name = name, Value = value };
 			Nodes.Add(node);
 			node.Properties.AddRange(properties);
