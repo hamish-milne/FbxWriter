@@ -46,9 +46,9 @@ namespace Fbx
 			return node;
 		}
 
-		public void AddComment(string text, bool hasDivider = false)
+		public void AddComment(string text, bool hasDivider = false, bool hasSpace = true)
 		{
-			FbxComment comment = new FbxComment { Name = text, HasDivider = hasDivider };
+			FbxComment comment = new FbxComment { Name = text, HasDivider = hasDivider, HasSpace = hasSpace };
 			Nodes.Add(comment);
 		}
 

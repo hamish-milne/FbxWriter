@@ -10,8 +10,9 @@ namespace Fbx
 	/// </summary>
 	public class FbxAsciiWriter
 	{
-		private const string Comment = "; {0}\n";
-		private const string Divider = "; ----------------------------------------------------\n";
+		private const string LineBreak = "\n";
+		private const string CommentPrefix = ";";
+		private const string Divider = "----------------------------------------------------";
 		
 		private readonly Stream stream;
 
@@ -40,22 +41,32 @@ namespace Fbx
 		// Adds the given node text to the string
 		void BuildString(FbxNode node, StringBuilder sb, bool writeArrayLength, int indentLevel = 0)
 		{
+			nodePath.Push(node.Name ?? "");
+			int lineStart = sb.Length;
+
+			// Add indentation.
+			for (int i = 0; i < indentLevel; i++)
+				sb.Append('\t');
+			
 			// Comments are nodes that are there purely for organizing the ASCII file.
 			if (node is FbxComment comment)
 			{
-				sb.Append(string.Format(Comment, comment.Name));
-				
+				// Add the comment itself.
+				string commentText = CommentPrefix;
+				if (comment.HasSpace)
+					commentText += " ";
+				commentText += comment.Name;
+				commentText += LineBreak;
+				sb.Append(commentText);
+
+				// If specified, also add a divider.
 				if (comment.HasDivider)
-					sb.Append(Divider);
+					sb.Append(CommentPrefix + (comment.HasSpace ? " " : "") + Divider + LineBreak);
 				
 				return;
 			}
-			
-			nodePath.Push(node.Name ?? "");
-			int lineStart = sb.Length;
+
 			// Write identifier
-			for (int i = 0; i < indentLevel; i++)
-				sb.Append('\t');
 			sb.Append(node.Name).Append(':');
 
 			// Write properties

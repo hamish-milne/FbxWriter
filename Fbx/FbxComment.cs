@@ -6,5 +6,6 @@ namespace Fbx
 	public class FbxComment : FbxNode
 	{
 		public bool HasDivider { get; set; }
+		public bool HasSpace { get; set; }
 	}
 }
