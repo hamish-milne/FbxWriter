@@ -111,6 +111,8 @@ namespace Fbx
 					}
 				} else if (p is char)
 					sb.Append((char) p);
+				else if (p is bool boolean)
+					sb.Append(boolean ? '1' : '0');
 				else if(p.GetType().IsPrimitive && p is IFormattable)
 					sb.Append(p);
 				else

@@ -75,6 +75,7 @@
     <Compile Include="PropertyBlocks\DoubleTypes.cs" />
     <Compile Include="PropertyBlocks\PropertyBlock.cs" />
     <Compile Include="PropertyBlocks\StringTypes.cs" />
+    <Compile Include="PropertyBlocks\Vector3D.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

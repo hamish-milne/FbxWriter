@@ -89,5 +89,36 @@ namespace Fbx.PropertyBlocks
 		{
 			root.Add(PropertyName, name, "ColorRGB", "Color", "", value.R, value.G, value.B);
 		}
+
+		public void AddVector3D(string name, Vector3D value)
+		{
+			root.Add(PropertyName, name, "Vector3D", "Vector", "", value.X, value.Y, value.Z);
+		}
+		
+		// Peculiar seemingly single-use custom property types.
+		public void AddLclTranslation(string name, Vector3D value)
+		{
+			root.Add(PropertyName, name, "Lcl Translation", "", "A", value.X, value.Y, value.Z);
+		}
+		
+		public void AddLclRotation(string name, Vector3D value)
+		{
+			root.Add(PropertyName, name, "Lcl Rotation", "", "A", value.X, value.Y, value.Z);
+		}
+		
+		public void AddLclScaling(string name, Vector3D value)
+		{
+			root.Add(PropertyName, name, "Lcl Scaling", "", "A", value.X, value.Y, value.Z);
+		}
+		
+		public void AddVisibility(string name, bool value)
+		{
+			root.Add(PropertyName, name, "Visibility", "", "A", value);
+		}
+		
+		public void AddVisibilityInheritance(string name, bool value)
+		{
+			root.Add(PropertyName, name, "Visibility Inheritance", "", "", value);
+		}
 	}
 }
