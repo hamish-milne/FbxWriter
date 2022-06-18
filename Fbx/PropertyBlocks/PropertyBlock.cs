@@ -74,6 +74,22 @@ namespace Fbx.PropertyBlocks
 			root.Add(PropertyName, name, "ULongLong", "", "", value);
 		}
 
+		public void AddShort(string name, short value, ShortTypes type = ShortTypes.Default)
+		{
+			string typeString;
+			switch (type)
+			{
+				default: typeString = "A"; break;
+				case ShortTypes.APlusUH: typeString = "A+UH"; break;
+			}
+			
+			// If someone could explain to me what on earth this is for, that would be great.
+			if (type == ShortTypes.APlusUH)
+				root.Add(PropertyName, name, "Short", "", typeString, value, value, value);
+			else
+				root.Add(PropertyName, name, "Short", "", typeString, value);
+		}
+
 		public void AddEnum(string name, int value)
 		{
 			root.Add(PropertyName, name, "enum", "", "", value);
