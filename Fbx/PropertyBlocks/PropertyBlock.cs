@@ -26,11 +26,10 @@ namespace Fbx.PropertyBlocks
 			root.Add(PropertyName, name, "object", "", "", value);
 		}
 		
-		public void AddCompound(string name)
+		public CompoundProperty AddCompound(string name)
 		{
-			// TODO: Do something clever here so we can add properties to this compound object and have it be
-			// formatted automatically? Maybe an in-between object?
 			root.Add(PropertyName, name, "Compound", "", "");
+			return new CompoundProperty(this, name);
 		}
 		
 		public void AddString(string name, string value, StringTypes type = StringTypes.Default)
