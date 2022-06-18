@@ -48,14 +48,30 @@ namespace Fbx.PropertyBlocks
 			root.Add(PropertyName, name, "KTime", "Time", "", value.Ticks);
 		}
 		
+		public void AddBool(string name, bool value)
+		{
+			root.Add(PropertyName, name, "bool", "", "", value ? 1 : 0);
+		}
+		
 		public void AddInteger(string name, int value)
 		{
 			root.Add(PropertyName, name, "int", "Integer", "", value);
 		}
 		
-		public void AddDouble(string name, double value)
+		public void AddNumber(string name, float value)
 		{
-			root.Add(PropertyName, name, "double", "Number", "", value);
+			root.Add(PropertyName, name, "Number", "", "A", value);
+		}
+		
+		public void AddDouble(string name, double value, DoubleTypes type = DoubleTypes.Default)
+		{
+			string typeString = type == DoubleTypes.Default ? "" : type.ToString();
+			root.Add(PropertyName, name, "double", "Number", typeString, value);
+		}
+
+		public void AddULongLong(string name, ulong value)
+		{
+			root.Add(PropertyName, name, "ULongLong", "", "", value);
 		}
 
 		public void AddEnum(string name, int value)

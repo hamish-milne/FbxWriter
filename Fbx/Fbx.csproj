@@ -72,6 +72,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyBlocks\ColorRGB.cs" />
     <Compile Include="PropertyBlocks\CompoundProperty.cs" />
+    <Compile Include="PropertyBlocks\DoubleTypes.cs" />
     <Compile Include="PropertyBlocks\PropertyBlock.cs" />
     <Compile Include="PropertyBlocks\StringTypes.cs" />
   </ItemGroup>
