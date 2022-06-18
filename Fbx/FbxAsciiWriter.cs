@@ -176,7 +176,7 @@ namespace Fbx
 			var vMinor = ((int) document.Version%1000)/100;
 			var vRev = ((int) document.Version%100)/10;
 			sb.Append($"; FBX {vMajor}.{vMinor}.{vRev} project file\n");
-			sb.Append(Divider + "\n");
+			sb.Append(Divider + "\n\n");
 
 			nodePath.Clear();
 			foreach (var n in document.Nodes)
