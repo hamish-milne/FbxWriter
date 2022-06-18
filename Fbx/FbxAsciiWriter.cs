@@ -48,7 +48,7 @@ namespace Fbx
 			for (int i = 0; i < indentLevel; i++)
 				sb.Append('\t');
 			
-			// Comments are nodes that are there purely for organizing the ASCII file.
+			// Comments are text nodes that are there purely for organizing the ASCII file.
 			if (node is FbxComment comment)
 			{
 				// Add the comment itself.
@@ -63,6 +63,13 @@ namespace Fbx
 				if (comment.HasDivider)
 					sb.Append(CommentPrefix + (comment.HasSpace ? " " : "") + Divider + LineBreak);
 				
+				return;
+			}
+
+			// Linebreaks are empty nodes that are there purely for creating empty space in the ASCII file.
+			if (node is FbxLineBreak)
+			{
+				sb.Append(LineBreak);
 				return;
 			}
 

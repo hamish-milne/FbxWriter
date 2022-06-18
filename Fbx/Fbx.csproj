@@ -64,6 +64,7 @@
     <Compile Include="FbxComment.cs" />
     <Compile Include="FbxDocument.cs" />
     <Compile Include="FbxException.cs" />
+    <Compile Include="FbxLineBreak.cs" />
     <Compile Include="FbxNode.cs" />
     <Compile Include="FbxAsciiReader.cs" />
     <Compile Include="FbxIO.cs" />

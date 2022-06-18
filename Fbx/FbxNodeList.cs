@@ -45,6 +45,11 @@ namespace Fbx
 			node.Properties.AddRange(properties);
 			return node;
 		}
+		
+		public void AddLineBreak()
+		{
+			Nodes.Add(new FbxLineBreak());
+		}
 
 		public void AddComment(string text, bool hasDivider = false, bool hasSpace = true)
 		{
