@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using Fbx.Data;
 using Fbx.PropertyBlocks;
 
 namespace Fbx
@@ -14,8 +16,14 @@ namespace Fbx
 		private const string ApplicationVersion = "000001";
 		private const string VendorName = "YourNameHere";
 
+		// TODO: Auto-generate these ID's?
+		private const long AnimationStackId = 2062929209808;
+		private const long BaseLayerId = 2061748850704;
+
 		private readonly string path;
 		private readonly FbxDocument fbxDocument;
+		
+		private readonly List<Joint> joints = new List<Joint>();
 
 		/// <summary>
 		/// Create a new FBX Template.
@@ -27,6 +35,17 @@ namespace Fbx
 
 			// Create a document.
 			fbxDocument = new FbxDocument { Version = FbxVersion.v7_5 };
+		}
+
+		/// <summary>
+		/// Add a joint to 
+		/// </summary>
+		/// <param name="joint"></param>
+		/// <returns></returns>
+		public Joint AddJoint(Joint joint)
+		{
+			joints.Add(joint);
+			return joint;
 		}
 
 		/// <summary>
@@ -161,6 +180,9 @@ namespace Fbx
 			fbxDocument.AddComment("Object definitions", true);
 			FbxNode definitions = fbxDocument.Add("Definitions");
 			definitions.Add("Version", 100);
+
+			// The count is the total number of objects including *their own* counts.
+			int count = 3 + 3 * joints.Count;
 			definitions.Add("Count", 5);
 
 			FbxNode globalSettings = definitions.Add("ObjectType", "GlobalSettings");
@@ -191,7 +213,7 @@ namespace Fbx
 			propertyBlock.AddULongLong("BlendModeBypass", 0);
 
 			FbxNode nodeAttribute = definitions.Add("ObjectType", "NodeAttribute");
-			nodeAttribute.Add("Count", 1);
+			nodeAttribute.Add("Count", joints.Count);
 			propertyTemplate = nodeAttribute.Add("PropertyTemplate", "FbxSkeleton");
 			propertyBlock = new PropertyBlock(propertyTemplate);
 			propertyBlock.AddColorRGB("Color", new ColorRGB(0.8f, 0.8f, 0.8f));
@@ -199,7 +221,7 @@ namespace Fbx
 			propertyBlock.AddDouble("LimbLength", 100, DoubleTypes.H);
 
 			FbxNode model = definitions.Add("ObjectType", "Model");
-			model.Add("Count", 1);
+			model.Add("Count", joints.Count);
 			propertyTemplate = model.Add("PropertyTemplate", "FbxNode");
 			propertyBlock = new PropertyBlock(propertyTemplate);
 			propertyBlock.AddEnum("QuaternionInterpolate", 0);
@@ -273,37 +295,58 @@ namespace Fbx
 			propertyBlock.AddLclTranslation("Lcl Scaling", Vector3D.One);
 			propertyBlock.AddVisibility("Visibility", true);
 			propertyBlock.AddVisibilityInheritance("Visibility Inheritance", true);
+			
+			FbxNode animationCurveNode = definitions.Add("ObjectType", "AnimationCurveNode");
+			animationCurveNode.Add("Count", joints.Count);
+			propertyTemplate = animationCurveNode.Add("PropertyTemplate", "FbxAnimCurveNode");
+			propertyBlock = new PropertyBlock(propertyTemplate);
+			propertyBlock.AddCompound("d");
 		}
 
 		private void CreateObjectProperties()
 		{
 			fbxDocument.AddComment("Object properties", true);
 			FbxNode objects = fbxDocument.Add("Objects");
+			PropertyBlock propertyBlock;
 
-			FbxNode limbNode = objects.Add("NodeAttribute", 1710781923776, "NodeAttribute::", "LimbNode");
-			PropertyBlock propertyBlock = new PropertyBlock(limbNode);
-			propertyBlock.AddDouble("Size", 333.333333333333);
-			limbNode.Add("TypeFlags", "Skeleton");
+			foreach (Joint joint in joints)
+			{
+				FbxNode limbNode = objects.Add("NodeAttribute", joint.AttributesNodeId, "NodeAttribute::", "LimbNode");
+				propertyBlock = new PropertyBlock(limbNode);
+				propertyBlock.AddDouble("Size", 333.333333333333);
+				limbNode.Add("TypeFlags", "Skeleton");
+			}
 
-			FbxNode joint1 = objects.Add("Model", 1710676519120, "Model::joint1", "LimbNode");
-			joint1.Add("Version", 232);
-			propertyBlock = new PropertyBlock(joint1);
-			propertyBlock.AddBool("RotationActive", true);
-			propertyBlock.AddEnum("InheritType", 1);
-			propertyBlock.AddVector3D("ScalingMax", Vector3D.Zero);
-			propertyBlock.AddInteger("DefaultAttributeIndex", 0);
-			propertyBlock.AddLclTranslation("Lcl Translation", new Vector3D(0, 0, 100));
-			joint1.Add("Shading", 'Y');
-			joint1.Add("Culling", "CullingOff");
+			foreach (Joint joint in joints)
+			{
+				FbxNode node = objects.Add("Model", joint.Id, "Model::" + joint.Name, "LimbNode");
+				node.Add("Version", 232);
+				propertyBlock = new PropertyBlock(node);
+				propertyBlock.AddBool("RotationActive", true);
+				propertyBlock.AddEnum("InheritType", 1);
+				propertyBlock.AddVector3D("ScalingMax", Vector3D.Zero);
+				propertyBlock.AddInteger("DefaultAttributeIndex", 0);
+				propertyBlock.AddLclTranslation("Lcl Translation", joint.Position);
+				propertyBlock.AddShort("filmboxTypeID", 5, ShortTypes.APlusUH);
+				node.Add("Shading", 'Y');
+				node.Add("Culling", "CullingOff");
+			}
 
-			FbxNode animationStack = objects.Add("AnimationStack", 1710772262592, "AnimStack::Take 001", "");
+			FbxNode animationStack = objects.Add("AnimationStack", AnimationStackId, "AnimStack::Take 001", "");
 			propertyBlock = new PropertyBlock(animationStack);
 			propertyBlock.AddTime("LocalStart", new DateTime(1539538600));
 			propertyBlock.AddTime("LocalStop", new DateTime(46186158000));
 			propertyBlock.AddTime("ReferenceStart", new DateTime(1539538600));
 			propertyBlock.AddTime("ReferenceStop", new DateTime(46186158000));
 
-			FbxNode animationLayer = objects.Add("AnimationLayer", 1710601890624, "AnimLayer::BaseLayer", "");
+			foreach (Joint joint in joints)
+			{
+				FbxNode animationCurveNode = objects.Add("AnimationCurveNode", joint.AnimCurveNodeId, "AnimCurveNode::filmboxTypeID", "");
+				propertyBlock = new PropertyBlock(animationCurveNode);
+				propertyBlock.AddShort("d|filmboxTypeID", 5);
+			}
+
+			FbxNode animationLayer = objects.Add("AnimationLayer", BaseLayerId, "AnimLayer::BaseLayer", "");
 			animationLayer.Add(null);
 		}
 
@@ -312,18 +355,38 @@ namespace Fbx
 			fbxDocument.AddComment("Object connections", true);
 			FbxNode connections = fbxDocument.Add("Connections");
 
-			// Weird format, man.
-			connections.AddLineBreak();
-			connections.AddComment("Model::joint1, Model::RootNode", false, false);
-			connections.Add("C", "OO", 1710676519120, 0);
+			// Connections from the joints to the root node
+			foreach (Joint joint in joints)
+			{
+				connections.AddLineBreak();
+				connections.AddComment($"Model::{joint.Name}, Model::RootNode", false, false);
+				connections.Add("C", "OO", joint.Id, 0);
+			}
 
+			// Connection from the base layer to the Take
 			connections.AddLineBreak();
 			connections.AddComment("AnimLayer::BaseLayer, AnimStack::Take 001", false, false);
-			connections.Add("C", "OO", 1710601890624, 1710772262592);
+			connections.Add("C", "OO", BaseLayerId, AnimationStackId);
 
-			connections.AddLineBreak();
-			connections.AddComment("NodeAttribute::, Model::joint1", false, false);
-			connections.Add("C", "OO", 1710781923776, 1710676519120);
+			// Connections from the joints' anim curve nodes to the base layer
+			foreach (Joint joint in joints)
+			{
+				connections.AddLineBreak();
+				connections.AddComment($"AnimCurveNode::filmboxTypeID, AnimLayer::BaseLayer", false, false);
+				connections.Add("C", "OO", joint.AnimCurveNodeId, BaseLayerId);
+			}
+			
+			// Connections from the joint's attribute & curve nodes to the joint itself
+			foreach (Joint joint in joints)
+			{
+				connections.AddLineBreak();
+				connections.AddComment($"NodeAttribute::, Model::{joint.Name}", false, false);
+				connections.Add("C", "OO", joint.AttributesNodeId, joint.Id);
+				
+				connections.AddLineBreak();
+				connections.AddComment($";AnimCurveNode::filmboxTypeID, Model::{joint.Name}", false, false);
+				connections.Add("C", "OO", joint.AnimCurveNodeId, joint.Id);
+			}
 		}
 
 		private void CreateTakes()

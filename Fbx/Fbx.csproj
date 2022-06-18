@@ -55,6 +55,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\Joint.cs" />
     <Compile Include="DeflateWithChecksum.cs" />
     <Compile Include="ErrorLevel.cs" />
     <Compile Include="FbxAsciiWriter.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="PropertyBlocks\CompoundProperty.cs" />
     <Compile Include="PropertyBlocks\DoubleTypes.cs" />
     <Compile Include="PropertyBlocks\PropertyBlock.cs" />
+    <Compile Include="PropertyBlocks\ShortTypes.cs" />
     <Compile Include="PropertyBlocks\StringTypes.cs" />
     <Compile Include="PropertyBlocks\Vector3D.cs" />
   </ItemGroup>
