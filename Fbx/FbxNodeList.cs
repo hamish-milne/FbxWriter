@@ -51,9 +51,9 @@ namespace Fbx
 			Nodes.Add(new FbxLineBreak());
 		}
 
-		public void AddComment(string text, bool hasDivider = false, bool hasSpace = true)
+		public void AddComment(string text, CommentTypes type)
 		{
-			FbxComment comment = new FbxComment { Name = text, HasDivider = hasDivider, HasSpace = hasSpace };
+			FbxComment comment = new FbxComment { Name = text, Type = type };
 			Nodes.Add(comment);
 		}
 

@@ -53,15 +53,17 @@ namespace Fbx
 			{
 				// Add the comment itself.
 				string commentText = CommentPrefix;
-				if (comment.HasSpace)
+				bool hasSpace = comment.Type == CommentTypes.Header;
+				bool hasDivider = comment.Type == CommentTypes.Header;
+				if (hasSpace)
 					commentText += " ";
 				commentText += comment.Name;
 				commentText += LineBreak;
 				sb.Append(commentText);
 
 				// If specified, also add a divider.
-				if (comment.HasDivider)
-					sb.Append(CommentPrefix + (comment.HasSpace ? " " : "") + Divider + LineBreak);
+				if (hasDivider)
+					sb.Append(CommentPrefix + (hasSpace ? " " : "") + Divider + LineBreak);
 				
 				return;
 			}

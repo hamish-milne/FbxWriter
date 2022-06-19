@@ -55,6 +55,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommentTypes.cs" />
     <Compile Include="Data\Joint.cs" />
     <Compile Include="DeflateWithChecksum.cs" />
     <Compile Include="ErrorLevel.cs" />

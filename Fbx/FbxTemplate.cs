@@ -154,7 +154,7 @@ namespace Fbx
 
 		private void CreateDocumentsDescription()
 		{
-			fbxDocument.AddComment("Documents Description", true);
+			fbxDocument.AddComment("Documents Description", CommentTypes.Header);
 			FbxNode documents = fbxDocument.Add("Documents");
 			documents.Add("Count", 1);
 
@@ -169,14 +169,14 @@ namespace Fbx
 
 		private void CreateDocumentReferences()
 		{
-			fbxDocument.AddComment("Document References", true);
+			fbxDocument.AddComment("Document References", CommentTypes.Header);
 			FbxNode references = fbxDocument.Add("References");
 			references.Add(null);
 		}
 
 		private void CreateObjectDefinitions()
 		{
-			fbxDocument.AddComment("Object definitions", true);
+			fbxDocument.AddComment("Object definitions", CommentTypes.Header);
 			FbxNode definitions = fbxDocument.Add("Definitions");
 			definitions.Add("Version", 100);
 
@@ -304,7 +304,7 @@ namespace Fbx
 
 		private void CreateObjectProperties()
 		{
-			fbxDocument.AddComment("Object properties", true);
+			fbxDocument.AddComment("Object properties", CommentTypes.Header);
 			FbxNode objects = fbxDocument.Add("Objects");
 			PropertyBlock propertyBlock;
 
@@ -356,7 +356,7 @@ namespace Fbx
 
 		private void CreateObjectConnections()
 		{
-			fbxDocument.AddComment("Object connections", true);
+			fbxDocument.AddComment("Object connections", CommentTypes.Header);
 			FbxNode connections = fbxDocument.Add("Connections");
 
 			// Connections from the joints to the parent node
@@ -366,26 +366,26 @@ namespace Fbx
 				
 				if (joint.Parent == null)
 				{
-					connections.AddComment($"Model::{joint.Name}, Model::RootNode", false, false);
+					connections.AddComment($"Model::{joint.Name}, Model::RootNode", CommentTypes.Inline);
 					connections.Add("C", "OO", joint.Id, 0);
 				}
 				else
 				{
-					connections.AddComment($"Model::{joint.Name}, Model::{joint.Parent.Name}", false, false);
+					connections.AddComment($"Model::{joint.Name}, Model::{joint.Parent.Name}", CommentTypes.Inline);
 					connections.Add("C", "OO", joint.Id, joint.Parent.Id);
 				}
 			}
 
 			// Connection from the base layer to the Take
 			connections.AddLineBreak();
-			connections.AddComment("AnimLayer::BaseLayer, AnimStack::Take 001", false, false);
+			connections.AddComment("AnimLayer::BaseLayer, AnimStack::Take 001", CommentTypes.Inline);
 			connections.Add("C", "OO", baseLayerId, animationStackId);
 
 			// Connections from the joints' anim curve nodes to the base layer
 			foreach (Joint joint in joints)
 			{
 				connections.AddLineBreak();
-				connections.AddComment($"AnimCurveNode::filmboxTypeID, AnimLayer::BaseLayer", false, false);
+				connections.AddComment($"AnimCurveNode::filmboxTypeID, AnimLayer::BaseLayer", CommentTypes.Inline);
 				connections.Add("C", "OO", joint.AnimCurveNodeId, baseLayerId);
 			}
 			
@@ -393,18 +393,18 @@ namespace Fbx
 			foreach (Joint joint in joints)
 			{
 				connections.AddLineBreak();
-				connections.AddComment($"NodeAttribute::, Model::{joint.Name}", false, false);
+				connections.AddComment($"NodeAttribute::, Model::{joint.Name}", CommentTypes.Inline);
 				connections.Add("C", "OO", joint.AttributesNodeId, joint.Id);
 				
 				connections.AddLineBreak();
-				connections.AddComment($";AnimCurveNode::filmboxTypeID, Model::{joint.Name}", false, false);
+				connections.AddComment($";AnimCurveNode::filmboxTypeID, Model::{joint.Name}", CommentTypes.Inline);
 				connections.Add("C", "OO", joint.AnimCurveNodeId, joint.Id);
 			}
 		}
 
 		private void CreateTakes()
 		{
-			fbxDocument.AddComment("Takes section", true);
+			fbxDocument.AddComment("Takes section", CommentTypes.Header);
 			FbxNode takes = fbxDocument.Add("Takes");
 			takes.Add("Current", "Take 001");
 			FbxNode take001 = takes.Add("Take", "Take 001");
