@@ -359,11 +359,12 @@ namespace Fbx
 			fbxDocument.AddComment("Object connections", CommentTypes.Header);
 			FbxNode connections = fbxDocument.Add("Connections");
 
-			// Connections from the joints to the parent node
+			// Joint connections.
 			foreach (Joint joint in joints)
 			{
 				connections.AddLineBreak();
 				
+				// Connections from the joints to the parent node.
 				if (joint.Parent == null)
 				{
 					connections.AddComment($"Model::{joint.Name}, Model::RootNode", CommentTypes.Inline);
@@ -374,24 +375,8 @@ namespace Fbx
 					connections.AddComment($"Model::{joint.Name}, Model::{joint.Parent.Name}", CommentTypes.Inline);
 					connections.Add("C", "OO", joint.Id, joint.Parent.Id);
 				}
-			}
-
-			// Connection from the base layer to the Take
-			connections.AddLineBreak();
-			connections.AddComment("AnimLayer::BaseLayer, AnimStack::Take 001", CommentTypes.Inline);
-			connections.Add("C", "OO", baseLayerId, animationStackId);
-
-			// Connections from the joints' anim curve nodes to the base layer
-			foreach (Joint joint in joints)
-			{
-				connections.AddLineBreak();
-				connections.AddComment($"AnimCurveNode::filmboxTypeID, AnimLayer::BaseLayer", CommentTypes.Inline);
-				connections.Add("C", "OO", joint.AnimCurveNodeId, baseLayerId);
-			}
-			
-			// Connections from the joint's attribute & curve nodes to the joint itself
-			foreach (Joint joint in joints)
-			{
+				
+				// Connections from the joint's attribute & curve nodes to the joint itself
 				connections.AddLineBreak();
 				connections.AddComment($"NodeAttribute::, Model::{joint.Name}", CommentTypes.Inline);
 				connections.Add("C", "OO", joint.AttributesNodeId, joint.Id);
@@ -399,7 +384,17 @@ namespace Fbx
 				connections.AddLineBreak();
 				connections.AddComment($";AnimCurveNode::filmboxTypeID, Model::{joint.Name}", CommentTypes.Inline);
 				connections.Add("C", "OO", joint.AnimCurveNodeId, joint.Id);
+				
+				// Connections from the joints' anim curve nodes to the base layer
+				connections.AddLineBreak();
+				connections.AddComment($"AnimCurveNode::filmboxTypeID, AnimLayer::BaseLayer", CommentTypes.Inline);
+				connections.Add("C", "OO", joint.AnimCurveNodeId, baseLayerId);
 			}
+
+			// Connection from the base layer to the Take
+			connections.AddLineBreak();
+			connections.AddComment("AnimLayer::BaseLayer, AnimStack::Take 001", CommentTypes.Inline);
+			connections.Add("C", "OO", baseLayerId, animationStackId);
 		}
 
 		private void CreateTakes()
