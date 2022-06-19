@@ -325,7 +325,12 @@ namespace Fbx
 				propertyBlock.AddEnum("InheritType", 1);
 				propertyBlock.AddVector3D("ScalingMax", Vector3D.Zero);
 				propertyBlock.AddInteger("DefaultAttributeIndex", 0);
-				propertyBlock.AddLclTranslation("Lcl Translation", joint.Position);
+				if (joint.Position != Vector3D.Zero)
+					propertyBlock.AddLclTranslation("Lcl Translation", joint.Position);
+				if (joint.Rotation != Vector3D.Zero)
+					propertyBlock.AddLclRotation("Lcl Rotation", joint.Rotation);
+				if (joint.Scaling != Vector3D.One)
+					propertyBlock.AddLclScaling("Lcl Scaling", joint.Scaling);
 				propertyBlock.AddShort("filmboxTypeID", 5, ShortTypes.APlusUH);
 				node.Add("Shading", 'Y');
 				node.Add("Culling", "CullingOff");
