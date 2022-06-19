@@ -359,12 +359,21 @@ namespace Fbx
 			fbxDocument.AddComment("Object connections", true);
 			FbxNode connections = fbxDocument.Add("Connections");
 
-			// Connections from the joints to the root node
+			// Connections from the joints to the parent node
 			foreach (Joint joint in joints)
 			{
 				connections.AddLineBreak();
-				connections.AddComment($"Model::{joint.Name}, Model::RootNode", false, false);
-				connections.Add("C", "OO", joint.Id, 0);
+				
+				if (joint.Parent == null)
+				{
+					connections.AddComment($"Model::{joint.Name}, Model::RootNode", false, false);
+					connections.Add("C", "OO", joint.Id, 0);
+				}
+				else
+				{
+					connections.AddComment($"Model::{joint.Name}, Model::{joint.Parent.Name}", false, false);
+					connections.Add("C", "OO", joint.Id, joint.Parent.Id);
+				}
 			}
 
 			// Connection from the base layer to the Take

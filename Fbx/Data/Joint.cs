@@ -30,6 +30,12 @@ namespace Fbx.Data
 		private Vector3D scaling;
 		public Vector3D Scaling => scaling;
 
+		private Joint parent;
+		public Joint Parent
+		{
+			get => parent;
+		}
+
 		/// <summary>
 		/// Creates a new joint.
 		/// </summary>
@@ -37,7 +43,7 @@ namespace Fbx.Data
 		/// <param name="position">Start position. TODO: Support animations.</param>
 		/// <param name="rotation">Start rotation.</param>
 		/// <param name="scaling">Start scaling.</param>
-		public Joint(string name, Vector3D position, Vector3D rotation, Vector3D scaling)
+		public Joint(string name, Vector3D position, Vector3D rotation, Vector3D scaling, Joint parent = null)
 		{
 			this.name = name;
 			id = FbxNodeId.GetNewId();
@@ -46,6 +52,7 @@ namespace Fbx.Data
 			this.position = position;
 			this.rotation = rotation;
 			this.scaling = scaling;
+			this.parent = parent;
 		}
 
 		/// <summary>
