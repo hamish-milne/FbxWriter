@@ -5,16 +5,20 @@ namespace Fbx.Data.Animation
 	/// </summary>
 	public class Key
 	{
-		private readonly float time;
-		public float Time => time;
+		private readonly long time;
+		public long Time => time;
 
 		private readonly float value;
 		public float Value => value;
+		
+		private readonly TangentMode tangentMode;
+		public TangentMode TangentMode => tangentMode;
 
-		public Key(float time, float value)
+		public Key(long time, float value, TangentMode tangentMode)
 		{
 			this.time = time;
 			this.value = value;
+			this.tangentMode = tangentMode;
 		}
 	}
 }

@@ -19,6 +19,8 @@ namespace Fbx.Data.Animation
 
 		private List<Key> keys = new List<Key>();
 
+		public int Count => keys.Count;
+
 		public Curve(Joint joint, CurveAttributes attribute)
 		{
 			id = FbxNodeId.GetNewId();
@@ -26,10 +28,9 @@ namespace Fbx.Data.Animation
 			this.attribute = attribute;
 		}
 
-		public void Add(float time, float value)
+		public void Add(long time, float value, TangentMode tangentMode)
 		{
-			Key key = new Key(time, value);
-			keys.Add(key);
+			keys.Add(new Key(time, value, tangentMode));
 		}
 
 		public IEnumerator<Key> GetEnumerator()
@@ -41,5 +42,7 @@ namespace Fbx.Data.Animation
 		{
 			return GetEnumerator();
 		}
+
+		public Key this[int index] => keys[index];
 	}
 }

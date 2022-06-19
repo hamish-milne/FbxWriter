@@ -358,6 +358,34 @@ namespace Fbx
 				propertyBlock.AddShort("d|filmboxTypeID", 5);
 			}
 
+			foreach (Curve curve in curves)
+			{
+				FbxNode animationCurve = objects.Add("AnimationCurve", curve.Id, "AnimCurve::", "");
+				animationCurve.Add("Default", 0);
+				animationCurve.Add("KeyVer", 4009);
+				
+				long[] times = new long[curve.Count];
+				float[] values = new float[curve.Count];
+				int[] tangentModes = new int[curve.Count]; 
+				for (int i = 0; i < curve.Count; i++)
+				{
+					Key key = curve[i];
+					times[i] = key.Time;
+					values[i] = key.Value;
+					tangentModes[i] = (int)key.TangentMode;
+				}
+				
+				animationCurve.Add("KeyTime", times);
+				animationCurve.Add("KeyValueFloat", values);
+				
+				// TODO: Describe the flags with text...
+				animationCurve.Add("KeyAttrFlags", tangentModes);
+				
+				// TODO: Add KeyAttrDataFloat
+				
+				// TODO: Add KeyAttrRefCount
+			}
+
 			FbxNode animationLayer = objects.Add("AnimationLayer", baseLayerId, "AnimLayer::BaseLayer", "");
 			animationLayer.Add(null);
 		}
