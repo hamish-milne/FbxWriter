@@ -69,6 +69,7 @@
     <Compile Include="FbxNode.cs" />
     <Compile Include="FbxAsciiReader.cs" />
     <Compile Include="FbxIO.cs" />
+    <Compile Include="FbxNodeId.cs" />
     <Compile Include="FbxNodeList.cs" />
     <Compile Include="FbxTemplate.cs" />
     <Compile Include="FbxVersion.cs" />

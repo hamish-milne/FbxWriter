@@ -12,14 +12,14 @@ namespace Fbx.Data
 		private string name;
 		public string Name => name;
 
-		private long id;
-		public long Id => id;
+		private FbxNodeId id;
+		public FbxNodeId Id => id;
 
-		private long attributesNodeId;
-		public long AttributesNodeId => attributesNodeId;
+		private FbxNodeId attributesNodeId;
+		public FbxNodeId AttributesNodeId => attributesNodeId;
 
-		private long animCurveNodeId;
-		public long AnimCurveNodeId => animCurveNodeId;
+		private FbxNodeId animCurveNodeId;
+		public FbxNodeId AnimCurveNodeId => animCurveNodeId;
 
 		private Vector3D position;
 		public Vector3D Position => position;
@@ -28,16 +28,13 @@ namespace Fbx.Data
 		/// Creates a new joint.
 		/// </summary>
 		/// <param name="name">Name of the joint.</param>
-		/// <param name="id">ID of the joint node. TODO: Auto-generate this.</param>
-		/// <param name="attributesNodeId">ID of the joint's attribute node. TODO: Auto-generate this.</param>
-		/// <param name="animCurveNodeId">ID of the joint's anim curve node. TODO: Auto-generate this.</param>
 		/// <param name="position">Start position. TODO: Support animations.</param>
-		public Joint(string name, long id, long attributesNodeId, long animCurveNodeId, Vector3D position)
+		public Joint(string name, Vector3D position)
 		{
 			this.name = name;
-			this.id = id;
-			this.attributesNodeId = attributesNodeId;
-			this.animCurveNodeId = animCurveNodeId;
+			id = FbxNodeId.GetNewId();
+			attributesNodeId = FbxNodeId.GetNewId();
+			animCurveNodeId = FbxNodeId.GetNewId();
 			this.position = position;
 		}
 	}

@@ -15,10 +15,9 @@ namespace Fbx
 		private const string ApplicationName = "FbxWriter-ForAnimations";
 		private const string ApplicationVersion = "000001";
 		private const string VendorName = "YourNameHere";
-
-		// TODO: Auto-generate these ID's?
-		private const long AnimationStackId = 2062929209808;
-		private const long BaseLayerId = 2061748850704;
+		
+		private readonly FbxNodeId animationStackId = FbxNodeId.GetNewId();
+		private readonly FbxNodeId baseLayerId = FbxNodeId.GetNewId();
 
 		private readonly string path;
 		private readonly FbxDocument fbxDocument;
@@ -332,7 +331,7 @@ namespace Fbx
 				node.Add("Culling", "CullingOff");
 			}
 
-			FbxNode animationStack = objects.Add("AnimationStack", AnimationStackId, "AnimStack::Take 001", "");
+			FbxNode animationStack = objects.Add("AnimationStack", animationStackId, "AnimStack::Take 001", "");
 			propertyBlock = new PropertyBlock(animationStack);
 			propertyBlock.AddTime("LocalStart", new DateTime(1539538600));
 			propertyBlock.AddTime("LocalStop", new DateTime(46186158000));
@@ -346,7 +345,7 @@ namespace Fbx
 				propertyBlock.AddShort("d|filmboxTypeID", 5);
 			}
 
-			FbxNode animationLayer = objects.Add("AnimationLayer", BaseLayerId, "AnimLayer::BaseLayer", "");
+			FbxNode animationLayer = objects.Add("AnimationLayer", baseLayerId, "AnimLayer::BaseLayer", "");
 			animationLayer.Add(null);
 		}
 
@@ -366,14 +365,14 @@ namespace Fbx
 			// Connection from the base layer to the Take
 			connections.AddLineBreak();
 			connections.AddComment("AnimLayer::BaseLayer, AnimStack::Take 001", false, false);
-			connections.Add("C", "OO", BaseLayerId, AnimationStackId);
+			connections.Add("C", "OO", baseLayerId, animationStackId);
 
 			// Connections from the joints' anim curve nodes to the base layer
 			foreach (Joint joint in joints)
 			{
 				connections.AddLineBreak();
 				connections.AddComment($"AnimCurveNode::filmboxTypeID, AnimLayer::BaseLayer", false, false);
-				connections.Add("C", "OO", joint.AnimCurveNodeId, BaseLayerId);
+				connections.Add("C", "OO", joint.AnimCurveNodeId, baseLayerId);
 			}
 			
 			// Connections from the joint's attribute & curve nodes to the joint itself
