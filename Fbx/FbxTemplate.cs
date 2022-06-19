@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Fbx.Data;
+using Fbx.Data.Animation;
 using Fbx.PropertyBlocks;
 
 namespace Fbx
@@ -23,6 +24,7 @@ namespace Fbx
 		private readonly FbxDocument fbxDocument;
 		
 		private readonly List<Joint> joints = new List<Joint>();
+		private readonly List<Curve> curves = new List<Curve>();
 
 		/// <summary>
 		/// Create a new FBX Template.
@@ -45,6 +47,12 @@ namespace Fbx
 		{
 			joints.Add(joint);
 			return joint;
+		}
+
+		public Curve AddCurve(Curve curve)
+		{
+			curves.Add(curve);
+			return curve;
 		}
 
 		/// <summary>

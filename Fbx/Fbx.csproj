@@ -56,6 +56,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommentTypes.cs" />
+    <Compile Include="Data\Animation\Curve.cs" />
+    <Compile Include="Data\Animation\CurveAttributes.cs" />
+    <Compile Include="Data\Animation\Key.cs" />
     <Compile Include="Data\Joint.cs" />
     <Compile Include="DeflateWithChecksum.cs" />
     <Compile Include="ErrorLevel.cs" />
