@@ -1,3 +1,5 @@
+using Fbx.Data.Times;
+
 namespace Fbx.Data.Animation
 {
 	/// <summary>
@@ -5,8 +7,8 @@ namespace Fbx.Data.Animation
 	/// </summary>
 	public class Key
 	{
-		private readonly long time;
-		public long Time => time;
+		private readonly FbxTime time;
+		public FbxTime Time => time;
 
 		private readonly float value;
 		public float Value => value;
@@ -14,7 +16,7 @@ namespace Fbx.Data.Animation
 		private readonly TangentModes tangentMode;
 		public TangentModes TangentMode => tangentMode;
 
-		public Key(long time, float value, TangentModes tangentMode)
+		public Key(FbxTime time, float value, TangentModes tangentMode)
 		{
 			this.time = time;
 			this.value = value;

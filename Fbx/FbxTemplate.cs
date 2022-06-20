@@ -374,7 +374,7 @@ namespace Fbx
 				for (int i = 0; i < curve.Count; i++)
 				{
 					Key key = curve[i];
-					times[i] = key.Time;
+					times[i] = key.Time.TimeInInternalFormat;
 					values[i] = key.Value;
 					tangentModes[i] = (int)key.TangentMode;
 				}

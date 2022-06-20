@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Fbx.Data.Times;
 
 namespace Fbx.Data.Animation
 {
@@ -28,7 +29,7 @@ namespace Fbx.Data.Animation
 			this.attribute = attribute;
 		}
 
-		public void Add(long time, float value, TangentModes tangentMode)
+		public void Add(FbxTime time, float value, TangentModes tangentMode)
 		{
 			keys.Add(new Key(time, value, tangentMode));
 		}

@@ -2,6 +2,7 @@
 using System.Text;
 using System.IO;
 using System.Collections.Generic;
+using Fbx.Data.Times;
 
 namespace Fbx
 {
@@ -135,6 +136,8 @@ namespace Fbx
 					sb.Append(boolean ? '1' : '0');
 				else if (p is FbxNodeId id)
 					sb.Append(id);
+				else if (p is FbxTime time)
+					sb.Append(time);
 				else if(p.GetType().IsPrimitive && p is IFormattable)
 					sb.Append(p);
 				else
