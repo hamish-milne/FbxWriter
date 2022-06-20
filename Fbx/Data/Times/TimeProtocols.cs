@@ -1,4 +1,4 @@
-namespace Fbx.Data.Animation
+namespace Fbx.Data.Times
 {
 	/// <summary>
 	/// Taken from the Autodesk FBX SDK and reformatted. All rights reserved.

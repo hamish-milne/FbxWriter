@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Fbx.Data;
 using Fbx.Data.Animation;
+using Fbx.Data.Times;
 using Fbx.PropertyBlocks;
 
 namespace Fbx

@@ -61,9 +61,9 @@
     <Compile Include="Data\Animation\InterpolationType.cs" />
     <Compile Include="Data\Animation\Key.cs" />
     <Compile Include="Data\Animation\TangentModes.cs" />
-    <Compile Include="Data\Animation\TimeModes.cs" />
-    <Compile Include="Data\Animation\TimeProtocols.cs" />
     <Compile Include="Data\Joint.cs" />
+    <Compile Include="Data\Times\TimeModes.cs" />
+    <Compile Include="Data\Times\TimeProtocols.cs" />
     <Compile Include="DeflateWithChecksum.cs" />
     <Compile Include="ErrorLevel.cs" />
     <Compile Include="FbxAsciiWriter.cs" />
