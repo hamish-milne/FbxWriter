@@ -32,7 +32,7 @@ namespace Fbx.Data.Animation
 	/// Frames119dot88	~119.88 frames/s
 	/// ModesCount		Number of time modes
 	/// </summary>
-	public enum TimeMode
+	public enum TimeModes
 	{
 		DefaultMode,
 		Frames120,

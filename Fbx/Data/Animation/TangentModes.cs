@@ -8,7 +8,7 @@ namespace Fbx.Data.Animation
 	/// The attribute flags that keys can have.
 	/// </summary>
 	[Flags]
-	public enum TangentMode
+	public enum TangentModes
 	{
 		Auto = 0x00000100, // Auto key (spline cardinal).
 		TCB = 0x00000200, // Spline TCB (Tension, Continuity, Bias)

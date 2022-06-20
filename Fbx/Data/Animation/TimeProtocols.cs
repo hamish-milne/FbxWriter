@@ -5,7 +5,7 @@ namespace Fbx.Data.Animation
 	/// 
 	/// The various kinds of time protocols that exist. The default value used seems to be 'DefaultProtocol'.
 	/// </summary>
-	public enum TimeProtocol
+	public enum TimeProtocols
 	{
 		SMPTE,
 		FrameCount,

@@ -11,10 +11,10 @@ namespace Fbx.Data.Animation
 		private readonly float value;
 		public float Value => value;
 		
-		private readonly TangentMode tangentMode;
-		public TangentMode TangentMode => tangentMode;
+		private readonly TangentModes tangentMode;
+		public TangentModes TangentMode => tangentMode;
 
-		public Key(long time, float value, TangentMode tangentMode)
+		public Key(long time, float value, TangentModes tangentMode)
 		{
 			this.time = time;
 			this.value = value;

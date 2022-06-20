@@ -28,7 +28,7 @@ namespace Fbx.Data.Animation
 			this.attribute = attribute;
 		}
 
-		public void Add(long time, float value, TangentMode tangentMode)
+		public void Add(long time, float value, TangentModes tangentMode)
 		{
 			keys.Add(new Key(time, value, tangentMode));
 		}
