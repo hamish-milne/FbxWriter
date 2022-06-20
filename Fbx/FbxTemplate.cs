@@ -16,6 +16,9 @@ namespace Fbx
 		private const string ApplicationName = "FbxWriter-ForAnimations";
 		private const string ApplicationVersion = "000001";
 		private const string VendorName = "YourNameHere";
+
+		private const TimeModes TimeMode = TimeModes.Frames30;
+		private const TimeProtocols TimeProtocol = TimeProtocols.DefaultProtocol;
 		
 		private readonly FbxNodeId animationStackId = FbxNodeId.GetNewId();
 		private readonly FbxNodeId baseLayerId = FbxNodeId.GetNewId();
@@ -150,8 +153,8 @@ namespace Fbx
 			properties.AddDouble("OriginalUnitScaleFactor", 1);
 			properties.AddColorRGB("AmbientColor", new ColorRGB(0, 0, 0));
 			properties.AddString("DefaultCamera", "Producer Perspective");
-			properties.AddEnum("TimeMode", 6);
-			properties.AddEnum("TimeProtocol", 2);
+			properties.AddEnum("TimeMode", TimeMode);
+			properties.AddEnum("TimeProtocol", TimeProtocol);
 			properties.AddEnum("SnapOnFrameMode", 0);
 			properties.AddTime("TimeSpanStart", new DateTime(1539538600));
 			properties.AddTime("TimeSpanStop", new DateTime(92372316000));
