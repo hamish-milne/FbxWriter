@@ -3,10 +3,9 @@ using System;
 namespace Fbx.Data.Animation
 {
 	/// <summary>
-	/// The attribute flags that keys can have.
+	/// Taken from the Autodesk FBX SDK and reformatted. All rights reserved.
 	/// 
-	/// NOTE: Taken from the Autodesk FBX SDK documentation:
-	/// https://help.autodesk.com/cloudhelp/2017/ENU/FBX-Developer-Help/cpp_ref/class_fbx_anim_curve_def.html#acda0d69b7f6c9aef2886b91230b780e2
+	/// The attribute flags that keys can have.
 	/// </summary>
 	[Flags]
 	public enum TangentMode
