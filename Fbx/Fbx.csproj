@@ -60,6 +60,7 @@
     <Compile Include="Data\Animation\CurveAttributes.cs" />
     <Compile Include="Data\Animation\InterpolationType.cs" />
     <Compile Include="Data\Animation\Key.cs" />
+    <Compile Include="Data\Animation\TangentDataIndices.cs" />
     <Compile Include="Data\Animation\TangentModes.cs" />
     <Compile Include="Data\Joint.cs" />
     <Compile Include="Data\Times\FbxTime.cs" />
