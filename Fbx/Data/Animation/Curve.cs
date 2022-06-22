@@ -9,8 +9,8 @@ namespace Fbx.Data.Animation
 	/// </summary>
 	public class Curve : IEnumerable<Key>
 	{
-		private readonly FbxNodeId id;
-		public FbxNodeId Id => id;
+		private readonly FbxId id;
+		public FbxId Id => id;
 		
 		private readonly Joint joint;
 		public Joint Joint => joint;
@@ -24,7 +24,7 @@ namespace Fbx.Data.Animation
 
 		public Curve(Joint joint, CurveAttributes attribute)
 		{
-			id = FbxNodeId.GetNewId();
+			id = FbxId.GetNewId();
 			this.joint = joint;
 			this.attribute = attribute;
 		}

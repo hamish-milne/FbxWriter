@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommentTypes.cs" />
+    <Compile Include="ConnectionTypes.cs" />
     <Compile Include="Data\Animation\Curve.cs" />
     <Compile Include="Data\Animation\CurveAttributes.cs" />
     <Compile Include="Data\Animation\InterpolationType.cs" />
@@ -73,13 +74,14 @@
     <Compile Include="FbxBinaryReader.cs" />
     <Compile Include="FbxBinaryWriter.cs" />
     <Compile Include="FbxComment.cs" />
+    <Compile Include="FbxConnection.cs" />
     <Compile Include="FbxDocument.cs" />
     <Compile Include="FbxException.cs" />
     <Compile Include="FbxLineBreak.cs" />
     <Compile Include="FbxNode.cs" />
     <Compile Include="FbxAsciiReader.cs" />
     <Compile Include="FbxIO.cs" />
-    <Compile Include="FbxNodeId.cs" />
+    <Compile Include="FbxId.cs" />
     <Compile Include="FbxNodeList.cs" />
     <Compile Include="FbxTemplate.cs" />
     <Compile Include="FbxVersion.cs" />

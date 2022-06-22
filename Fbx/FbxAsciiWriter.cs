@@ -134,7 +134,7 @@ namespace Fbx
 					sb.Append((char) p);
 				else if (p is bool boolean)
 					sb.Append(boolean ? '1' : '0');
-				else if (p is FbxNodeId id)
+				else if (p is FbxId id)
 					sb.Append(id);
 				else if (p is FbxTime time)
 					sb.Append(time);

@@ -21,14 +21,16 @@ namespace Fbx
 		private const TimeModes TimeMode = TimeModes.Frames30;
 		private const TimeProtocols TimeProtocol = TimeProtocols.DefaultProtocol;
 		
-		private readonly FbxNodeId animationStackId = FbxNodeId.GetNewId();
-		private readonly FbxNodeId baseLayerId = FbxNodeId.GetNewId();
+		private readonly FbxId animationStackId = FbxId.GetNewId();
+		private readonly FbxId baseLayerId = FbxId.GetNewId();
 
 		private readonly string path;
 		private readonly FbxDocument fbxDocument;
 		
 		private readonly List<Joint> joints = new List<Joint>();
 		private readonly List<Curve> curves = new List<Curve>();
+		
+		private readonly List<FbxConnection> connections = new List<FbxConnection>();
 
 		/// <summary>
 		/// Create a new FBX Template.
@@ -57,6 +59,14 @@ namespace Fbx
 		{
 			curves.Add(curve);
 			return curve;
+		}
+
+		private void AddConnection(ConnectionTypes type,
+			FbxId fromId, string fromType, string fromName,
+			FbxId toId, string toType, string toName)
+		{
+			FbxConnection connection = new FbxConnection(type, fromId, fromType, fromName, toId, toType, toName);
+			connections.Add(connection);
 		}
 
 		/// <summary>
@@ -400,41 +410,38 @@ namespace Fbx
 			FbxNode connections = fbxDocument.Add("Connections");
 
 			// Joint connections.
+			FbxId rootNodeId = new FbxId();
 			foreach (Joint joint in joints)
 			{
-				connections.AddLineBreak();
-				
 				// Connections from the joints to the parent node.
 				if (joint.Parent == null)
-				{
-					connections.AddComment($"Model::{joint.Name}, Model::RootNode", CommentTypes.Inline);
-					connections.Add("C", "OO", joint.Id, 0);
-				}
+					AddConnection(ConnectionTypes.OO, joint.Id, "Model", joint.Name, rootNodeId, "Model", "RootNode");
 				else
-				{
-					connections.AddComment($"Model::{joint.Name}, Model::{joint.Parent.Name}", CommentTypes.Inline);
-					connections.Add("C", "OO", joint.Id, joint.Parent.Id);
-				}
-				
+					AddConnection(ConnectionTypes.OO, joint.Id, "Model", joint.Name, joint.Parent.Id, "Model", joint.Parent.Name);
+
 				// Connections from the joint's attribute & curve nodes to the joint itself
-				connections.AddLineBreak();
-				connections.AddComment($"NodeAttribute::, Model::{joint.Name}", CommentTypes.Inline);
-				connections.Add("C", "OO", joint.AttributesNodeId, joint.Id);
-				
-				connections.AddLineBreak();
-				connections.AddComment($";AnimCurveNode::filmboxTypeID, Model::{joint.Name}", CommentTypes.Inline);
-				connections.Add("C", "OO", joint.AnimCurveNodeId, joint.Id);
+				AddConnection(ConnectionTypes.OO, joint.AttributesNodeId, "NodeAttribute", "", joint.Id, "Model", joint.Name);
+				AddConnection(ConnectionTypes.OP, joint.AnimCurveNodeId, "AnimCurveNode", "filmboxTypeID", joint.Id, "Model", joint.Name);
 				
 				// Connections from the joints' anim curve nodes to the base layer
-				connections.AddLineBreak();
-				connections.AddComment($"AnimCurveNode::filmboxTypeID, AnimLayer::BaseLayer", CommentTypes.Inline);
-				connections.Add("C", "OO", joint.AnimCurveNodeId, baseLayerId);
+				AddConnection(ConnectionTypes.OO, joint.AnimCurveNodeId, "AnimCurveNode", "filmboxTypeID", baseLayerId, "AnimLayer", "BaseLayer");
 			}
 
 			// Connection from the base layer to the Take
-			connections.AddLineBreak();
-			connections.AddComment("AnimLayer::BaseLayer, AnimStack::Take 001", CommentTypes.Inline);
-			connections.Add("C", "OO", baseLayerId, animationStackId);
+			AddConnection(ConnectionTypes.OO, baseLayerId, "AnimLayer", "BaseLayer", animationStackId, "AnimStack", "Take 001");
+			
+			// Write all the connections.
+			foreach (FbxConnection connection in this.connections)
+			{
+				connections.AddLineBreak();
+				connections.AddComment(
+					$"{connection.FromType}::{connection.FromName}, {connection.ToType}::{connection.ToName}",
+					CommentTypes.Inline);
+
+				string suffix = connection.ConnectionType == ConnectionTypes.OP ? "filmboxTypeID" : null;
+				connections.Add(
+					"C", GetAbbreviation(connection.ConnectionType), connection.FromId, connection.ToId, suffix);
+			}
 		}
 
 		private void CreateTakes()
@@ -446,6 +453,21 @@ namespace Fbx
 			take001.Add("FileName", "Take_001.tak");
 			take001.Add("LocalTime", 1539538600, 46186158000);
 			take001.Add("ReferenceTime", 1539538600, 46186158000);
+		}
+		
+		private static string GetAbbreviation(ConnectionTypes connectionType)
+		{
+			switch (connectionType)
+			{
+				case ConnectionTypes.OP:
+					return "OP";
+				case ConnectionTypes.OO:
+					return "OO";
+				case ConnectionTypes.PP:
+					return "PP";
+				default:
+					throw new ArgumentOutOfRangeException(nameof(connectionType), connectionType, null);
+			}
 		}
 	}
 }

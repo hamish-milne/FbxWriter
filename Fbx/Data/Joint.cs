@@ -12,14 +12,14 @@ namespace Fbx.Data
 		private string name;
 		public string Name => name;
 
-		private FbxNodeId id;
-		public FbxNodeId Id => id;
+		private FbxId id;
+		public FbxId Id => id;
 
-		private FbxNodeId attributesNodeId;
-		public FbxNodeId AttributesNodeId => attributesNodeId;
+		private FbxId attributesNodeId;
+		public FbxId AttributesNodeId => attributesNodeId;
 
-		private FbxNodeId animCurveNodeId;
-		public FbxNodeId AnimCurveNodeId => animCurveNodeId;
+		private FbxId animCurveNodeId;
+		public FbxId AnimCurveNodeId => animCurveNodeId;
 
 		private Vector3D position;
 		public Vector3D Position => position;
@@ -46,9 +46,9 @@ namespace Fbx.Data
 		public Joint(string name, Vector3D position, Vector3D rotation, Vector3D scaling, Joint parent = null)
 		{
 			this.name = name;
-			id = FbxNodeId.GetNewId();
-			attributesNodeId = FbxNodeId.GetNewId();
-			animCurveNodeId = FbxNodeId.GetNewId();
+			id = FbxId.GetNewId();
+			attributesNodeId = FbxId.GetNewId();
+			animCurveNodeId = FbxId.GetNewId();
 			this.position = position;
 			this.rotation = rotation;
 			this.scaling = scaling;
