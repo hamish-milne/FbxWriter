@@ -429,6 +429,16 @@ namespace Fbx
 				AddConnection(ConnectionTypes.OO, joint.AnimCurveNodeId, "AnimCurveNode", "filmboxTypeID", baseLayerId, "AnimLayer", "BaseLayer");
 			}
 
+			// Connections from the curve to the base layer and to the joint itself.
+			foreach (Curve curve in curves)
+			{
+				AddConnection(ConnectionTypes.OO, curve.Id, "AnimCurveNode", Shorten(curve.Channel), baseLayerId, "AnimLayer", "BaseLayer");
+				AddConnection(ConnectionTypes.OP, curve.Id, "AnimCurveNode", Shorten(curve.Channel), curve.Joint.Id, "Model", curve.Joint.Name, Elongate(curve.Channel));
+				
+				// TODO: There's a connection that goes from a so-called "AnimCurve" object (not AnimCurveNode) to the anim curve node for this specific channel.
+				// What is this AnimCurve object exactly? Is it shared for all of the channels of the joint? Does each channel have its own... ?
+			}
+
 			// Connection from the base layer to the Take
 			AddConnection(ConnectionTypes.OO, baseLayerId, "AnimLayer", "BaseLayer", animationStackId, "AnimStack", "Take 001");
 			
@@ -441,7 +451,7 @@ namespace Fbx
 					CommentTypes.Inline);
 
 				connections.Add(
-					"C", GetAbbreviation(connection.ConnectionType), connection.FromId, connection.ToId,
+					"C", Shorten(connection.ConnectionType), connection.FromId, connection.ToId,
 					connection.Description);
 			}
 		}
@@ -457,7 +467,7 @@ namespace Fbx
 			take001.Add("ReferenceTime", 1539538600, 46186158000);
 		}
 		
-		private static string GetAbbreviation(ConnectionTypes connectionType)
+		private static string Shorten(ConnectionTypes connectionType)
 		{
 			switch (connectionType)
 			{
@@ -469,6 +479,36 @@ namespace Fbx
 					return "PP";
 				default:
 					throw new ArgumentOutOfRangeException(nameof(connectionType), connectionType, null);
+			}
+		}
+		
+		private static string Shorten(CurveChannels channel)
+		{
+			switch (channel)
+			{
+				case CurveChannels.Position:
+					return "T"; // As in translation.
+				case CurveChannels.Rotation:
+					return "R";
+				case CurveChannels.Scaling:
+					return "S";
+				default:
+					throw new ArgumentOutOfRangeException(nameof(channel), channel, null);
+			}
+		}
+		
+		private static string Elongate(CurveChannels channel)
+		{
+			switch (channel)
+			{
+				case CurveChannels.Position:
+					return "Lcl Translation";
+				case CurveChannels.Rotation:
+					return "Lcl Rotation";
+				case CurveChannels.Scaling:
+					return "Lcl Scaling";
+				default:
+					throw new ArgumentOutOfRangeException(nameof(channel), channel, null);
 			}
 		}
 	}
