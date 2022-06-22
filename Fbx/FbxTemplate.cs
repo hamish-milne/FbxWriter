@@ -63,9 +63,11 @@ namespace Fbx
 
 		private void AddConnection(ConnectionTypes type,
 			FbxId fromId, string fromType, string fromName,
-			FbxId toId, string toType, string toName)
+			FbxId toId, string toType, string toName,
+			string description = null)
 		{
-			FbxConnection connection = new FbxConnection(type, fromId, fromType, fromName, toId, toType, toName);
+			FbxConnection connection = new FbxConnection(
+				type, fromId, fromType, fromName, toId, toType, toName, description);
 			connections.Add(connection);
 		}
 
@@ -421,7 +423,7 @@ namespace Fbx
 
 				// Connections from the joint's attribute & curve nodes to the joint itself
 				AddConnection(ConnectionTypes.OO, joint.AttributesNodeId, "NodeAttribute", "", joint.Id, "Model", joint.Name);
-				AddConnection(ConnectionTypes.OP, joint.AnimCurveNodeId, "AnimCurveNode", "filmboxTypeID", joint.Id, "Model", joint.Name);
+				AddConnection(ConnectionTypes.OP, joint.AnimCurveNodeId, "AnimCurveNode", "filmboxTypeID", joint.Id, "Model", joint.Name, "filmboxTypeID");
 				
 				// Connections from the joints' anim curve nodes to the base layer
 				AddConnection(ConnectionTypes.OO, joint.AnimCurveNodeId, "AnimCurveNode", "filmboxTypeID", baseLayerId, "AnimLayer", "BaseLayer");
@@ -438,9 +440,9 @@ namespace Fbx
 					$"{connection.FromType}::{connection.FromName}, {connection.ToType}::{connection.ToName}",
 					CommentTypes.Inline);
 
-				string suffix = connection.ConnectionType == ConnectionTypes.OP ? "filmboxTypeID" : null;
 				connections.Add(
-					"C", GetAbbreviation(connection.ConnectionType), connection.FromId, connection.ToId, suffix);
+					"C", GetAbbreviation(connection.ConnectionType), connection.FromId, connection.ToId,
+					connection.Description);
 			}
 		}
 

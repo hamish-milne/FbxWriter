@@ -25,10 +25,14 @@ namespace Fbx
 		
 		private string toName;
 		public string ToName => toName;
+		
+		private string description;
+		public string Description => description;
 
-		public FbxConnection(ConnectionTypes connectionType,
+		public FbxConnection(
+			ConnectionTypes connectionType,
 			FbxId fromId, string fromType, string fromName,
-			FbxId toId, string toType, string toName)
+			FbxId toId, string toType, string toName, string description)
 		{
 			this.connectionType = connectionType;
 			this.fromId = fromId;
@@ -37,6 +41,7 @@ namespace Fbx
 			this.toId = toId;
 			this.toType = toType;
 			this.toName = toName;
+			this.description = description;
 		}
 	}
 }
