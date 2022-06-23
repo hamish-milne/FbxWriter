@@ -15,18 +15,18 @@ namespace Fbx.Data.Animation
 		private readonly Joint joint;
 		public Joint Joint => joint;
 
-		private CurveChannels channel;
-		public CurveChannels Channel => channel;
+		private CurveProperties property;
+		public CurveProperties Property => property;
 
 		private List<Key> keys = new List<Key>();
 
 		public int Count => keys.Count;
 
-		public Curve(Joint joint, CurveChannels channel)
+		public Curve(Joint joint, CurveProperties property)
 		{
 			id = FbxId.GetNewId();
 			this.joint = joint;
-			this.channel = channel;
+			this.property = property;
 		}
 
 		public void Add(FbxTime time, float value, TangentModes tangentMode)

@@ -344,8 +344,8 @@ namespace Fbx
 				propertyBlock.AddEnum("InheritType", 1);
 				propertyBlock.AddVector3D("ScalingMax", Vector3D.Zero);
 				propertyBlock.AddInteger("DefaultAttributeIndex", 0);
-				if (joint.Position != Vector3D.Zero)
-					propertyBlock.AddLclTranslation("Lcl Translation", joint.Position);
+				if (joint.Translation != Vector3D.Zero)
+					propertyBlock.AddLclTranslation("Lcl Translation", joint.Translation);
 				if (joint.Rotation != Vector3D.Zero)
 					propertyBlock.AddLclRotation("Lcl Rotation", joint.Rotation);
 				if (joint.Scaling != Vector3D.One)
@@ -371,9 +371,9 @@ namespace Fbx
 					// Create a node for the Translation.
 					FbxNode translationNode = objects.Add("AnimationCurveNode", FbxId.GetNewId(), "AnimCurveNode::T", "");
 					propertyBlock = new PropertyBlock(translationNode);
-					propertyBlock.AddNumber("d|X", joint.Position.X);
-					propertyBlock.AddNumber("d|Y", joint.Position.Y);
-					propertyBlock.AddNumber("d|Z", joint.Position.Z);
+					propertyBlock.AddNumber("d|X", joint.Translation.X);
+					propertyBlock.AddNumber("d|Y", joint.Translation.Y);
+					propertyBlock.AddNumber("d|Z", joint.Translation.Z);
 					
 					// Create a node for the Rotation.
 					FbxNode rotationNode = objects.Add("AnimationCurveNode", FbxId.GetNewId(), "AnimCurveNode::R", "");
@@ -456,8 +456,8 @@ namespace Fbx
 			// Connections from the curve to the base layer and to the joint itself.
 			foreach (Curve curve in curves)
 			{
-				AddConnection(ConnectionTypes.OO, curve.Id, "AnimCurveNode", Shorten(curve.Channel), baseLayerId, "AnimLayer", "BaseLayer");
-				AddConnection(ConnectionTypes.OP, curve.Id, "AnimCurveNode", Shorten(curve.Channel), curve.Joint.Id, "Model", curve.Joint.Name, Elongate(curve.Channel));
+				AddConnection(ConnectionTypes.OO, curve.Id, "AnimCurveNode", Shorten(curve.Property), baseLayerId, "AnimLayer", "BaseLayer");
+				AddConnection(ConnectionTypes.OP, curve.Id, "AnimCurveNode", Shorten(curve.Property), curve.Joint.Id, "Model", curve.Joint.Name, Elongate(curve.Property));
 				
 				// TODO: There's a connection that goes from a so-called "AnimCurve" object (not AnimCurveNode) to the anim curve node for this specific channel.
 				// What is this AnimCurve object exactly? Is it shared for all of the components of the curve? Does each component have its own... ?
@@ -506,33 +506,33 @@ namespace Fbx
 			}
 		}
 		
-		private static string Shorten(CurveChannels channel)
+		private static string Shorten(CurveProperties property)
 		{
-			switch (channel)
+			switch (property)
 			{
-				case CurveChannels.Position:
-					return "T"; // As in translation.
-				case CurveChannels.Rotation:
+				case CurveProperties.Translation:
+					return "T";
+				case CurveProperties.Rotation:
 					return "R";
-				case CurveChannels.Scaling:
+				case CurveProperties.Scaling:
 					return "S";
 				default:
-					throw new ArgumentOutOfRangeException(nameof(channel), channel, null);
+					throw new ArgumentOutOfRangeException(nameof(property), property, null);
 			}
 		}
 		
-		private static string Elongate(CurveChannels channel)
+		private static string Elongate(CurveProperties property)
 		{
-			switch (channel)
+			switch (property)
 			{
-				case CurveChannels.Position:
+				case CurveProperties.Translation:
 					return "Lcl Translation";
-				case CurveChannels.Rotation:
+				case CurveProperties.Rotation:
 					return "Lcl Rotation";
-				case CurveChannels.Scaling:
+				case CurveProperties.Scaling:
 					return "Lcl Scaling";
 				default:
-					throw new ArgumentOutOfRangeException(nameof(channel), channel, null);
+					throw new ArgumentOutOfRangeException(nameof(property), property, null);
 			}
 		}
 	}

@@ -21,8 +21,8 @@ namespace Fbx.Data
 		private FbxId animCurveNodeId;
 		public FbxId AnimCurveNodeId => animCurveNodeId;
 
-		private Vector3D position;
-		public Vector3D Position => position;
+		private Vector3D translation;
+		public Vector3D Translation => translation;
 		
 		private Vector3D rotation;
 		public Vector3D Rotation => rotation;
@@ -40,16 +40,16 @@ namespace Fbx.Data
 		/// Creates a new joint.
 		/// </summary>
 		/// <param name="name">Name of the joint.</param>
-		/// <param name="position">Start position. TODO: Support animations.</param>
+		/// <param name="translation">Start position. TODO: Support animations.</param>
 		/// <param name="rotation">Start rotation.</param>
 		/// <param name="scaling">Start scaling.</param>
-		public Joint(string name, Vector3D position, Vector3D rotation, Vector3D scaling, Joint parent = null)
+		public Joint(string name, Vector3D translation, Vector3D rotation, Vector3D scaling, Joint parent = null)
 		{
 			this.name = name;
 			id = FbxId.GetNewId();
 			attributesNodeId = FbxId.GetNewId();
 			animCurveNodeId = FbxId.GetNewId();
-			this.position = position;
+			this.translation = translation;
 			this.rotation = rotation;
 			this.scaling = scaling;
 			this.parent = parent;
@@ -59,9 +59,9 @@ namespace Fbx.Data
 		/// Creates a new joint.
 		/// </summary>
 		/// <param name="name">Name of the joint.</param>
-		/// <param name="position">Start position. TODO: Support animations.</param>
-		public Joint(string name, Vector3D position, Vector3D rotation)
-			: this(name, position, rotation, Vector3D.One)
+		/// <param name="translation">Start position. TODO: Support animations.</param>
+		public Joint(string name, Vector3D translation, Vector3D rotation)
+			: this(name, translation, rotation, Vector3D.One)
 		{
 		}
 
@@ -69,9 +69,9 @@ namespace Fbx.Data
 		/// Creates a new joint.
 		/// </summary>
 		/// <param name="name">Name of the joint.</param>
-		/// <param name="position">Start position. TODO: Support animations.</param>
-		public Joint(string name, Vector3D position)
-			: this(name, position, Vector3D.Zero)
+		/// <param name="translation">Start position. TODO: Support animations.</param>
+		public Joint(string name, Vector3D translation)
+			: this(name, translation, Vector3D.Zero)
 		{
 		}
 	}

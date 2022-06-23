@@ -58,7 +58,7 @@
     <Compile Include="CommentTypes.cs" />
     <Compile Include="ConnectionTypes.cs" />
     <Compile Include="Data\Animation\Curve.cs" />
-    <Compile Include="Data\Animation\CurveChannels.cs" />
+    <Compile Include="Data\Animation\CurveProperties.cs" />
     <Compile Include="Data\Animation\InterpolationType.cs" />
     <Compile Include="Data\Animation\Key.cs" />
     <Compile Include="Data\Animation\TangentDataIndices.cs" />
