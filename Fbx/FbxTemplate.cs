@@ -452,7 +452,7 @@ namespace Fbx
 
 				connections.Add(
 					"C", Shorten(connection.ConnectionType), connection.FromId, connection.ToId,
-					connection.Description);
+					connection.Property);
 			}
 		}
 
