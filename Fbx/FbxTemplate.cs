@@ -32,6 +32,8 @@ namespace Fbx
 		
 		private readonly List<FbxConnection> connections = new List<FbxConnection>();
 
+		private bool IsAnimated => curves.Count > 0;
+
 		/// <summary>
 		/// Create a new FBX Template.
 		/// </summary>
@@ -331,17 +333,10 @@ namespace Fbx
 			fbxDocument.AddComment("Object properties", CommentTypes.Header);
 			FbxNode objects = fbxDocument.Add("Objects");
 			PropertyBlock propertyBlock;
-
+			
 			foreach (Joint joint in joints)
 			{
-				FbxNode limbNode = objects.Add("NodeAttribute", joint.AttributesNodeId, "NodeAttribute::", "LimbNode");
-				propertyBlock = new PropertyBlock(limbNode);
-				propertyBlock.AddDouble("Size", 333.333333333333);
-				limbNode.Add("TypeFlags", "Skeleton");
-			}
-
-			foreach (Joint joint in joints)
-			{
+				// Create a node for the joint itself.
 				FbxNode node = objects.Add("Model", joint.Id, "Model::" + joint.Name, "LimbNode");
 				node.Add("Version", 232);
 				propertyBlock = new PropertyBlock(node);
@@ -358,6 +353,20 @@ namespace Fbx
 				propertyBlock.AddShort("filmboxTypeID", 5, ShortTypes.APlusUH);
 				node.Add("Shading", 'Y');
 				node.Add("Culling", "CullingOff");
+				
+				// Create an attribute node.
+				FbxNode limbNode = objects.Add("NodeAttribute", joint.AttributesNodeId, "NodeAttribute::", "LimbNode");
+				propertyBlock = new PropertyBlock(limbNode);
+				propertyBlock.AddDouble("Size", 333.333333333333);
+				limbNode.Add("TypeFlags", "Skeleton");
+				
+				// Create a node for the filmboxTypeID. Only necessary if this scene is animated.
+				if (IsAnimated)
+				{
+					FbxNode animationCurveNode = objects.Add("AnimationCurveNode", joint.AnimCurveNodeId, "AnimCurveNode::filmboxTypeID", "");
+					propertyBlock = new PropertyBlock(animationCurveNode);
+					propertyBlock.AddShort("d|filmboxTypeID", 5);
+				}
 			}
 
 			FbxNode animationStack = objects.Add("AnimationStack", animationStackId, "AnimStack::Take 001", "");
@@ -366,13 +375,6 @@ namespace Fbx
 			propertyBlock.AddTime("LocalStop", new DateTime(46186158000));
 			propertyBlock.AddTime("ReferenceStart", new DateTime(1539538600));
 			propertyBlock.AddTime("ReferenceStop", new DateTime(46186158000));
-
-			foreach (Joint joint in joints)
-			{
-				FbxNode animationCurveNode = objects.Add("AnimationCurveNode", joint.AnimCurveNodeId, "AnimCurveNode::filmboxTypeID", "");
-				propertyBlock = new PropertyBlock(animationCurveNode);
-				propertyBlock.AddShort("d|filmboxTypeID", 5);
-			}
 
 			foreach (Curve curve in curves)
 			{
@@ -436,7 +438,7 @@ namespace Fbx
 				AddConnection(ConnectionTypes.OP, curve.Id, "AnimCurveNode", Shorten(curve.Channel), curve.Joint.Id, "Model", curve.Joint.Name, Elongate(curve.Channel));
 				
 				// TODO: There's a connection that goes from a so-called "AnimCurve" object (not AnimCurveNode) to the anim curve node for this specific channel.
-				// What is this AnimCurve object exactly? Is it shared for all of the channels of the joint? Does each channel have its own... ?
+				// What is this AnimCurve object exactly? Is it shared for all of the components of the curve? Does each component have its own... ?
 			}
 
 			// Connection from the base layer to the Take
