@@ -344,6 +344,7 @@ namespace Fbx
 				propertyBlock.AddEnum("InheritType", 1);
 				propertyBlock.AddVector3D("ScalingMax", Vector3D.Zero);
 				propertyBlock.AddInteger("DefaultAttributeIndex", 0);
+				
 				if (joint.Translation != Vector3D.Zero)
 					propertyBlock.AddLclTranslation("Lcl Translation", joint.Translation);
 				if (joint.Rotation != Vector3D.Zero)
@@ -351,6 +352,7 @@ namespace Fbx
 				if (joint.Scaling != Vector3D.One)
 					propertyBlock.AddLclScaling("Lcl Scaling", joint.Scaling);
 				propertyBlock.AddShort("filmboxTypeID", 5, ShortTypes.APlusUH);
+				
 				node.Add("Shading", 'Y');
 				node.Add("Culling", "CullingOff");
 				
@@ -363,31 +365,34 @@ namespace Fbx
 				// Only necessary if this scene is animated.
 				if (IsAnimated)
 				{
-					// Create a node for the filmboxTypeID.
-					FbxNode filmboxTypeIdNode = objects.Add("AnimationCurveNode", FbxId.GetNewId(), "AnimCurveNode::filmboxTypeID", "");
-					propertyBlock = new PropertyBlock(filmboxTypeIdNode);
-					propertyBlock.AddShort("d|filmboxTypeID", 5);
-					
-					// Create a node for the Translation.
-					FbxNode translationNode = objects.Add("AnimationCurveNode", FbxId.GetNewId(), "AnimCurveNode::T", "");
-					propertyBlock = new PropertyBlock(translationNode);
-					propertyBlock.AddNumber("d|X", joint.Translation.X);
-					propertyBlock.AddNumber("d|Y", joint.Translation.Y);
-					propertyBlock.AddNumber("d|Z", joint.Translation.Z);
-					
-					// Create a node for the Rotation.
-					FbxNode rotationNode = objects.Add("AnimationCurveNode", FbxId.GetNewId(), "AnimCurveNode::R", "");
-					propertyBlock = new PropertyBlock(rotationNode);
-					propertyBlock.AddNumber("d|X", joint.Rotation.X);
-					propertyBlock.AddNumber("d|Y", joint.Rotation.Y);
-					propertyBlock.AddNumber("d|Z", joint.Rotation.Z);
-					
-					// Create a node for the Scaling.
-					FbxNode scalingNode = objects.Add("AnimationCurveNode", FbxId.GetNewId(), "AnimCurveNode::S", "");
-					propertyBlock = new PropertyBlock(scalingNode);
-					propertyBlock.AddNumber("d|X", joint.Scaling.X);
-					propertyBlock.AddNumber("d|Y", joint.Scaling.Y);
-					propertyBlock.AddNumber("d|Z", joint.Scaling.Z);
+					List<AnimatablePropertyBase> animatableProperties = joint.GetAnimatableProperties();
+
+					// Create an AnimationCurveNode for every animatable property.
+					foreach (AnimatablePropertyBase animatableProperty in animatableProperties)
+					{
+						string nodeName = GetNodeName(animatableProperty.AnimatablePropertyType);
+
+						FbxId animationCurveNodeId = FbxId.GetNewId();
+						FbxNode animationCurveNode = objects.Add("AnimationCurveNode", animationCurveNodeId, $"AnimCurveNode::{nodeName}", "");
+						Type valueType = animatableProperty.GetValueType();
+						
+						// Handle the various property types that can exist. Currently only short and Vector3D.
+						propertyBlock = new PropertyBlock(animationCurveNode);
+						if (valueType == typeof(short))
+							propertyBlock.AddShort($"d|{nodeName}", (short)animatableProperty.GetValueRaw());
+						else if (valueType == typeof(Vector3D))
+						{
+							Vector3D value = (Vector3D)animatableProperty.GetValueRaw();
+							propertyBlock.AddNumber("d|X", value.X);
+							propertyBlock.AddNumber("d|Y", value.Y);
+							propertyBlock.AddNumber("d|Z", value.Z);
+						}
+						else
+							throw new NotImplementedException($"Tried to create AnimationCurveNode for unsupported value type '{valueType}'");
+
+						// Also assign it back to the animatable property so we can reference it later.
+						animatableProperty.AnimationCurveNodeId = animationCurveNodeId;
+					}
 				}
 			}
 
@@ -445,22 +450,32 @@ namespace Fbx
 				else
 					AddConnection(ConnectionTypes.OO, joint.Id, "Model", joint.Name, joint.Parent.Id, "Model", joint.Parent.Name);
 
-				// Connections from the joint's attribute & curve nodes to the joint itself
+				// Connections from the joint's attribute node to the joint itself
 				AddConnection(ConnectionTypes.OO, joint.AttributesNodeId, "NodeAttribute", "", joint.Id, "Model", joint.Name);
-				AddConnection(ConnectionTypes.OP, joint.AnimCurveNodeId, "AnimCurveNode", "filmboxTypeID", joint.Id, "Model", joint.Name, "filmboxTypeID");
 				
-				// Connections from the joints' anim curve nodes to the base layer
-				AddConnection(ConnectionTypes.OO, joint.AnimCurveNodeId, "AnimCurveNode", "filmboxTypeID", baseLayerId, "AnimLayer", "BaseLayer");
+				// Connections from the joints' anim curve nodes to the base layer and also to the joint's property.
+				if (IsAnimated)
+				{
+					List<AnimatablePropertyBase> animatableProperties = joint.GetAnimatableProperties();
+					foreach (AnimatablePropertyBase animatableProperty in animatableProperties)
+					{
+						string nodeName = GetNodeName(animatableProperty.AnimatablePropertyType);
+						AddConnection(
+							ConnectionTypes.OO, animatableProperty.AnimationCurveNodeId, "AnimCurveNode", nodeName,
+							baseLayerId, "AnimLayer", "BaseLayer");
+
+						string propertyName = GetPropertyName(animatableProperty.AnimatablePropertyType);
+						AddConnection(
+							ConnectionTypes.OP, animatableProperty.AnimationCurveNodeId, "AnimCurveNode", nodeName,
+							joint.Id, "Model", joint.Name, propertyName);
+					}
+				}
 			}
 
-			// Connections from the curve to the base layer and to the joint itself.
 			foreach (Curve curve in curves)
 			{
-				AddConnection(ConnectionTypes.OO, curve.Id, "AnimCurveNode", Shorten(curve.Property), baseLayerId, "AnimLayer", "BaseLayer");
-				AddConnection(ConnectionTypes.OP, curve.Id, "AnimCurveNode", Shorten(curve.Property), curve.Joint.Id, "Model", curve.Joint.Name, Elongate(curve.Property));
-				
-				// TODO: There's a connection that goes from a so-called "AnimCurve" object (not AnimCurveNode) to the anim curve node for this specific channel.
-				// What is this AnimCurve object exactly? Is it shared for all of the components of the curve? Does each component have its own... ?
+				// TODO: Write a connection from the curve node to the AnimationCurveNode for the respective property,
+				// and then reference the relevant component, like d|X. 
 			}
 
 			// Connection from the base layer to the Take
@@ -506,30 +521,34 @@ namespace Fbx
 			}
 		}
 		
-		private static string Shorten(CurveProperties property)
+		private static string GetNodeName(AnimatablePropertyTypes property)
 		{
 			switch (property)
 			{
-				case CurveProperties.Translation:
+				case AnimatablePropertyTypes.FilmboxTypeID:
+					return "filmboxTypeID";
+				case AnimatablePropertyTypes.Translation:
 					return "T";
-				case CurveProperties.Rotation:
+				case AnimatablePropertyTypes.Rotation:
 					return "R";
-				case CurveProperties.Scaling:
+				case AnimatablePropertyTypes.Scaling:
 					return "S";
 				default:
 					throw new ArgumentOutOfRangeException(nameof(property), property, null);
 			}
 		}
 		
-		private static string Elongate(CurveProperties property)
+		private static string GetPropertyName(AnimatablePropertyTypes property)
 		{
 			switch (property)
 			{
-				case CurveProperties.Translation:
+				case AnimatablePropertyTypes.FilmboxTypeID:
+					return "filmboxTypeID";
+				case AnimatablePropertyTypes.Translation:
 					return "Lcl Translation";
-				case CurveProperties.Rotation:
+				case AnimatablePropertyTypes.Rotation:
 					return "Lcl Rotation";
-				case CurveProperties.Scaling:
+				case AnimatablePropertyTypes.Scaling:
 					return "Lcl Scaling";
 				default:
 					throw new ArgumentOutOfRangeException(nameof(property), property, null);

@@ -15,14 +15,14 @@ namespace Fbx.Data.Animation
 		private readonly Joint joint;
 		public Joint Joint => joint;
 
-		private CurveProperties property;
-		public CurveProperties Property => property;
+		private AnimatablePropertyTypes property;
+		public AnimatablePropertyTypes Property => property;
 
 		private List<Key> keys = new List<Key>();
 
 		public int Count => keys.Count;
 
-		public Curve(Joint joint, CurveProperties property)
+		public Curve(Joint joint, AnimatablePropertyTypes property)
 		{
 			id = FbxId.GetNewId();
 			this.joint = joint;

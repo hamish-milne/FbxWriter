@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Fbx.Data.Animation;
 using Fbx.PropertyBlocks;
 
 namespace Fbx.Data
@@ -18,23 +22,22 @@ namespace Fbx.Data
 		private FbxId attributesNodeId;
 		public FbxId AttributesNodeId => attributesNodeId;
 
-		private FbxId animCurveNodeId;
-		public FbxId AnimCurveNodeId => animCurveNodeId;
+		private AnimatableProperty<short> filmboxTypeID;
+		public AnimatableProperty<short> FilmboxTypeId => filmboxTypeID;
 
-		private Vector3D translation;
-		public Vector3D Translation => translation;
+		private AnimatableProperty<Vector3D> translation;
+		public AnimatableProperty<Vector3D> Translation => translation;
 		
-		private Vector3D rotation;
-		public Vector3D Rotation => rotation;
+		private AnimatableProperty<Vector3D> rotation;
+		public AnimatableProperty<Vector3D> Rotation => rotation;
 		
-		private Vector3D scaling;
-		public Vector3D Scaling => scaling;
+		private AnimatableProperty<Vector3D> scaling;
+		public AnimatableProperty<Vector3D> Scaling => scaling;
 
 		private Joint parent;
-		public Joint Parent
-		{
-			get => parent;
-		}
+		public Joint Parent => parent;
+		
+		private List<AnimatablePropertyBase> animatableProperties;
 
 		/// <summary>
 		/// Creates a new joint.
@@ -48,10 +51,14 @@ namespace Fbx.Data
 			this.name = name;
 			id = FbxId.GetNewId();
 			attributesNodeId = FbxId.GetNewId();
-			animCurveNodeId = FbxId.GetNewId();
-			this.translation = translation;
-			this.rotation = rotation;
-			this.scaling = scaling;
+			
+			// NOTE: Not sure what this means exactly, but it seems to always be 5.
+			filmboxTypeID = new AnimatableProperty<short>(AnimatablePropertyTypes.FilmboxTypeID, 5);
+			
+			this.translation = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Translation, translation);
+			this.rotation = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Rotation, rotation);
+			this.scaling = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Scaling, scaling);
+			
 			this.parent = parent;
 		}
 
@@ -73,6 +80,32 @@ namespace Fbx.Data
 		public Joint(string name, Vector3D translation)
 			: this(name, translation, Vector3D.Zero)
 		{
+		}
+
+		/// <summary>
+		/// Gets all the animatable properties defined in this joint.
+		/// </summary>
+		/// <returns>List of all animatable properties.</returns>
+		public List<AnimatablePropertyBase> GetAnimatableProperties()
+		{
+			if (animatableProperties != null)
+				return animatableProperties;
+			
+			animatableProperties = new List<AnimatablePropertyBase>();
+			FieldInfo[] allFields = GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+			Type animatablePropertyType = typeof(AnimatablePropertyBase);
+			
+			// Find all the animatable properties using reflection.
+			foreach (FieldInfo fieldInfo in allFields)
+			{
+				if (!animatablePropertyType.IsAssignableFrom(fieldInfo.FieldType))
+					continue;
+
+				AnimatablePropertyBase animatableProperty = (AnimatablePropertyBase)fieldInfo.GetValue(this);
+				animatableProperties.Add(animatableProperty);
+			}
+
+			return animatableProperties;
 		}
 	}
 }
