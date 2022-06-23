@@ -360,12 +360,34 @@ namespace Fbx
 				propertyBlock.AddDouble("Size", 333.333333333333);
 				limbNode.Add("TypeFlags", "Skeleton");
 				
-				// Create a node for the filmboxTypeID. Only necessary if this scene is animated.
+				// Only necessary if this scene is animated.
 				if (IsAnimated)
 				{
-					FbxNode animationCurveNode = objects.Add("AnimationCurveNode", joint.AnimCurveNodeId, "AnimCurveNode::filmboxTypeID", "");
-					propertyBlock = new PropertyBlock(animationCurveNode);
+					// Create a node for the filmboxTypeID.
+					FbxNode filmboxTypeIdNode = objects.Add("AnimationCurveNode", FbxId.GetNewId(), "AnimCurveNode::filmboxTypeID", "");
+					propertyBlock = new PropertyBlock(filmboxTypeIdNode);
 					propertyBlock.AddShort("d|filmboxTypeID", 5);
+					
+					// Create a node for the Translation.
+					FbxNode translationNode = objects.Add("AnimationCurveNode", FbxId.GetNewId(), "AnimCurveNode::T", "");
+					propertyBlock = new PropertyBlock(translationNode);
+					propertyBlock.AddNumber("d|X", joint.Position.X);
+					propertyBlock.AddNumber("d|Y", joint.Position.Y);
+					propertyBlock.AddNumber("d|Z", joint.Position.Z);
+					
+					// Create a node for the Rotation.
+					FbxNode rotationNode = objects.Add("AnimationCurveNode", FbxId.GetNewId(), "AnimCurveNode::R", "");
+					propertyBlock = new PropertyBlock(rotationNode);
+					propertyBlock.AddNumber("d|X", joint.Rotation.X);
+					propertyBlock.AddNumber("d|Y", joint.Rotation.Y);
+					propertyBlock.AddNumber("d|Z", joint.Rotation.Z);
+					
+					// Create a node for the Scaling.
+					FbxNode scalingNode = objects.Add("AnimationCurveNode", FbxId.GetNewId(), "AnimCurveNode::S", "");
+					propertyBlock = new PropertyBlock(scalingNode);
+					propertyBlock.AddNumber("d|X", joint.Scaling.X);
+					propertyBlock.AddNumber("d|Y", joint.Scaling.Y);
+					propertyBlock.AddNumber("d|Z", joint.Scaling.Z);
 				}
 			}
 
