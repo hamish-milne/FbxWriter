@@ -1,5 +1,4 @@
 using System;
-using Fbx.Data.Animation;
 
 namespace Fbx.Data
 {
@@ -14,14 +13,10 @@ namespace Fbx.Data
 
 		private FbxNode animationCurveNode;
 
-		private readonly AnimatablePropertyTypes animatablePropertyType;
-		public override AnimatablePropertyTypes AnimatablePropertyType => animatablePropertyType;
-
-		public AnimatableProperty(AnimatablePropertyTypes animatablePropertyType, string nodeName, string propertyName, ValueType value)
+		public AnimatableProperty(string nodeName, string propertyName, ValueType value)
 			: base(nodeName, propertyName)
 		{
 			this.value = value;
-			this.animatablePropertyType = animatablePropertyType;
 		}
 
 		public static implicit operator ValueType(AnimatableProperty<ValueType> animatableProperty)

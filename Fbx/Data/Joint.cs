@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Fbx.Data.Animation;
 using Fbx.PropertyBlocks;
 
 namespace Fbx.Data
@@ -54,11 +53,11 @@ namespace Fbx.Data
 			attributesNodeId = FbxId.GetNewId();
 			
 			// NOTE: Not sure what this means exactly, but it seems to always be 5.
-			filmboxTypeID = new AnimatableProperty<short>(AnimatablePropertyTypes.FilmboxTypeID, "filmboxTypeID", "filmboxTypeID", 5);
+			filmboxTypeID = new AnimatableProperty<short>("filmboxTypeID", "filmboxTypeID", 5);
 			
-			this.translation = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Translation, "T", "Lcl Translation", translation);
-			this.rotation = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Rotation, "R", "Lcl Rotation", rotation);
-			this.scaling = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Scaling, "S", "Lcl Scaling", scaling);
+			this.translation = new AnimatableProperty<Vector3D>("T", "Lcl Translation", translation);
+			this.rotation = new AnimatableProperty<Vector3D>("R", "Lcl Rotation", rotation);
+			this.scaling = new AnimatableProperty<Vector3D>("S", "Lcl Scaling", scaling);
 			
 			this.parent = parent;
 

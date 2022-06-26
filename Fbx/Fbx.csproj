@@ -60,7 +60,6 @@
     <Compile Include="Data\AnimatableProperty.cs" />
     <Compile Include="Data\AnimatablePropertyBase.cs" />
     <Compile Include="Data\Animation\Curve.cs" />
-    <Compile Include="Data\Animation\AnimatablePropertyTypes.cs" />
     <Compile Include="Data\Animation\InterpolationType.cs" />
     <Compile Include="Data\Animation\Key.cs" />
     <Compile Include="Data\Animation\TangentDataIndices.cs" />

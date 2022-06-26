@@ -1,5 +1,4 @@
 using System;
-using Fbx.Data.Animation;
 
 namespace Fbx.Data
 {
@@ -21,8 +20,6 @@ namespace Fbx.Data
 		
 		private IAnimatablePropertyOwner owner;
 		public IAnimatablePropertyOwner Owner => owner;
-
-		public abstract AnimatablePropertyTypes AnimatablePropertyType { get; }
 
 		public abstract Type GetValueType();
 		public abstract object GetValueRaw();
