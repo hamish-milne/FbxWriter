@@ -12,10 +12,13 @@ namespace Fbx.Data.Times
 	/// </summary>
 	public struct FbxTime
 	{
+		private const long FrameRate = 30;
+
 		/// <summary>
 		/// What seems to be the interval between frames as exported from a 30FPS file.
 		/// </summary>
-		private const long IntervalPerThirtiethOfSecond = 1539538600;
+		private const long IntervalPerSecond = 46186158000;
+		private const long IntervalPerFrame = IntervalPerSecond / FrameRate;
 		
 		private long time;
 		
@@ -37,7 +40,7 @@ namespace Fbx.Data.Times
 			// Had to reverse engineer the format because it's not documented anywhere, lol
 			// NOTE: This currently assumes a 30 FPS file. If you want to support other formats, you need to update this
 			// conversion to work for every type of TimeMode. Have fun with that...
-			time = frame * IntervalPerThirtiethOfSecond;
+			time = frame * IntervalPerFrame;
 		}
 
 		/// <summary>
