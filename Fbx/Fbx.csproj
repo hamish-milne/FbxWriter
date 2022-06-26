@@ -65,6 +65,7 @@
     <Compile Include="Data\Animation\Key.cs" />
     <Compile Include="Data\Animation\TangentDataIndices.cs" />
     <Compile Include="Data\Animation\TangentModes.cs" />
+    <Compile Include="Data\IAnimatablePropertyOwner.cs" />
     <Compile Include="Data\Joint.cs" />
     <Compile Include="Data\Times\FbxTime.cs" />
     <Compile Include="Data\Times\TimeModes.cs" />

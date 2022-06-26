@@ -11,7 +11,7 @@ namespace Fbx.Data
 	/// add it to an FbxTemplate, then write that to an FBX. This allows you to work on a simple and intuitive level
 	/// which is translated to the complicated FBX syntax under the hood. 
 	/// </summary>
-	public class Joint
+	public class Joint : IAnimatablePropertyOwner
 	{
 		private string name;
 		public string Name => name;
@@ -46,6 +46,7 @@ namespace Fbx.Data
 		/// <param name="translation">Start position. TODO: Support animations.</param>
 		/// <param name="rotation">Start rotation.</param>
 		/// <param name="scaling">Start scaling.</param>
+		/// <param name="parent">The parent joint that this joint is a child of.</param>
 		public Joint(string name, Vector3D translation, Vector3D rotation, Vector3D scaling, Joint parent = null)
 		{
 			this.name = name;
@@ -53,13 +54,20 @@ namespace Fbx.Data
 			attributesNodeId = FbxId.GetNewId();
 			
 			// NOTE: Not sure what this means exactly, but it seems to always be 5.
-			filmboxTypeID = new AnimatableProperty<short>(AnimatablePropertyTypes.FilmboxTypeID, 5);
+			filmboxTypeID = new AnimatableProperty<short>(AnimatablePropertyTypes.FilmboxTypeID, "filmboxTypeID", "filmboxTypeID", 5);
 			
-			this.translation = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Translation, translation);
-			this.rotation = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Rotation, rotation);
-			this.scaling = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Scaling, scaling);
+			this.translation = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Translation, "T", "Lcl Translation", translation);
+			this.rotation = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Rotation, "R", "Lcl Rotation", rotation);
+			this.scaling = new AnimatableProperty<Vector3D>(AnimatablePropertyTypes.Scaling, "S", "Lcl Scaling", scaling);
 			
 			this.parent = parent;
+
+			// Initialize the animatable properties with an owner.
+			List<AnimatablePropertyBase> animatableProperties = GetAnimatableProperties();
+			foreach (AnimatablePropertyBase animatableProperty in animatableProperties)
+			{
+				animatableProperty.Initialize(this);
+			}
 		}
 
 		/// <summary>

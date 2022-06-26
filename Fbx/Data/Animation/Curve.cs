@@ -15,18 +15,21 @@ namespace Fbx.Data.Animation
 		private readonly Joint joint;
 		public Joint Joint => joint;
 
-		private AnimatablePropertyTypes property;
-		public AnimatablePropertyTypes Property => property;
+		private AnimatablePropertyBase property;
+		public AnimatablePropertyBase Property => property;
+		
+		private string component;
+		public string Component => component;
 
 		private List<Key> keys = new List<Key>();
 
 		public int Count => keys.Count;
 
-		public Curve(Joint joint, AnimatablePropertyTypes property)
+		public Curve(AnimatablePropertyBase property, string component)
 		{
 			id = FbxId.GetNewId();
-			this.joint = joint;
 			this.property = property;
+			this.component = component;
 		}
 
 		public void Add(FbxTime time, float value, TangentModes tangentMode)

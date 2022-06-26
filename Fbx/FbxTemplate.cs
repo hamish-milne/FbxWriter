@@ -66,10 +66,10 @@ namespace Fbx
 		private void AddConnection(ConnectionTypes type,
 			FbxId fromId, string fromType, string fromName,
 			FbxId toId, string toType, string toName,
-			string description = null)
+			string property = null)
 		{
 			FbxConnection connection = new FbxConnection(
-				type, fromId, fromType, fromName, toId, toType, toName, description);
+				type, fromId, fromType, fromName, toId, toType, toName, property);
 			connections.Add(connection);
 		}
 
@@ -370,7 +370,7 @@ namespace Fbx
 					// Create an AnimationCurveNode for every animatable property.
 					foreach (AnimatablePropertyBase animatableProperty in animatableProperties)
 					{
-						string nodeName = GetNodeName(animatableProperty.AnimatablePropertyType);
+						string nodeName = animatableProperty.NodeName;
 
 						FbxId animationCurveNodeId = FbxId.GetNewId();
 						FbxNode animationCurveNode = objects.Add("AnimationCurveNode", animationCurveNodeId, $"AnimCurveNode::{nodeName}", "");
@@ -459,12 +459,12 @@ namespace Fbx
 					List<AnimatablePropertyBase> animatableProperties = joint.GetAnimatableProperties();
 					foreach (AnimatablePropertyBase animatableProperty in animatableProperties)
 					{
-						string nodeName = GetNodeName(animatableProperty.AnimatablePropertyType);
+						string nodeName = animatableProperty.NodeName;
 						AddConnection(
 							ConnectionTypes.OO, animatableProperty.AnimationCurveNodeId, "AnimCurveNode", nodeName,
 							baseLayerId, "AnimLayer", "BaseLayer");
 
-						string propertyName = GetPropertyName(animatableProperty.AnimatablePropertyType);
+						string propertyName = animatableProperty.PropertyName;
 						AddConnection(
 							ConnectionTypes.OP, animatableProperty.AnimationCurveNodeId, "AnimCurveNode", nodeName,
 							joint.Id, "Model", joint.Name, propertyName);
@@ -476,6 +476,9 @@ namespace Fbx
 			{
 				// TODO: Write a connection from the curve node to the AnimationCurveNode for the respective property,
 				// and then reference the relevant component, like d|X. 
+				AddConnection(
+					ConnectionTypes.OP, curve.Id, "AnimCurve", "", curve.Property.AnimationCurveNodeId, "AnimCurveNode",
+					curve.Property.NodeName, curve.Component);
 			}
 
 			// Connection from the base layer to the Take
@@ -518,40 +521,6 @@ namespace Fbx
 					return "PP";
 				default:
 					throw new ArgumentOutOfRangeException(nameof(connectionType), connectionType, null);
-			}
-		}
-		
-		private static string GetNodeName(AnimatablePropertyTypes property)
-		{
-			switch (property)
-			{
-				case AnimatablePropertyTypes.FilmboxTypeID:
-					return "filmboxTypeID";
-				case AnimatablePropertyTypes.Translation:
-					return "T";
-				case AnimatablePropertyTypes.Rotation:
-					return "R";
-				case AnimatablePropertyTypes.Scaling:
-					return "S";
-				default:
-					throw new ArgumentOutOfRangeException(nameof(property), property, null);
-			}
-		}
-		
-		private static string GetPropertyName(AnimatablePropertyTypes property)
-		{
-			switch (property)
-			{
-				case AnimatablePropertyTypes.FilmboxTypeID:
-					return "filmboxTypeID";
-				case AnimatablePropertyTypes.Translation:
-					return "Lcl Translation";
-				case AnimatablePropertyTypes.Rotation:
-					return "Lcl Rotation";
-				case AnimatablePropertyTypes.Scaling:
-					return "Lcl Scaling";
-				default:
-					throw new ArgumentOutOfRangeException(nameof(property), property, null);
 			}
 		}
 	}
