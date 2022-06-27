@@ -334,6 +334,16 @@ namespace Fbx
 			FbxNode objects = fbxDocument.Add("Objects");
 			PropertyBlock propertyBlock;
 			
+			FbxNode animationStack = objects.Add("AnimationStack", animationStackId, "AnimStack::Take 001", "");
+			propertyBlock = new PropertyBlock(animationStack);
+			propertyBlock.AddTime("LocalStart", new DateTime(1539538600));
+			propertyBlock.AddTime("LocalStop", new DateTime(46186158000));
+			propertyBlock.AddTime("ReferenceStart", new DateTime(1539538600));
+			propertyBlock.AddTime("ReferenceStop", new DateTime(46186158000));
+			
+			FbxNode animationLayer = objects.Add("AnimationLayer", baseLayerId, "AnimLayer::BaseLayer", "");
+			animationLayer.Add(null);
+			
 			foreach (Joint joint in joints)
 			{
 				// Create a node for the joint itself.
@@ -396,13 +406,6 @@ namespace Fbx
 				}
 			}
 
-			FbxNode animationStack = objects.Add("AnimationStack", animationStackId, "AnimStack::Take 001", "");
-			propertyBlock = new PropertyBlock(animationStack);
-			propertyBlock.AddTime("LocalStart", new DateTime(1539538600));
-			propertyBlock.AddTime("LocalStop", new DateTime(46186158000));
-			propertyBlock.AddTime("ReferenceStart", new DateTime(1539538600));
-			propertyBlock.AddTime("ReferenceStop", new DateTime(46186158000));
-
 			foreach (Curve curve in curves)
 			{
 				FbxNode animationCurve = objects.Add("AnimationCurve", curve.Id, "AnimCurve::", "");
@@ -411,13 +414,26 @@ namespace Fbx
 				
 				long[] times = new long[curve.Count];
 				float[] values = new float[curve.Count];
-				int[] tangentModes = new int[curve.Count]; 
+				int[] tangentModes = new int[curve.Count];
+				const int AttrDataPerKey = 4;
+				long[] attrDataFloat = new long[curve.Count * AttrDataPerKey];
+				int[] attrRefCount = new int[curve.Count];
 				for (int i = 0; i < curve.Count; i++)
 				{
 					Key key = curve[i];
 					times[i] = key.Time.TimeInInternalFormat;
 					values[i] = key.Value;
 					tangentModes[i] = (int)key.TangentMode;
+					
+					// There seem to be four per key?
+					for (int j = 0; j < AttrDataPerKey; j++)
+					{
+						// TODO: Figure out what the values of this field actually mean.
+						attrDataFloat[i * AttrDataPerKey + j] = 0;
+					}
+
+					// TODO: Figure out what the values of this field actually mean. 
+					attrRefCount[i] = 1;
 				}
 				
 				animationCurve.Add("KeyTime", times);
@@ -426,13 +442,11 @@ namespace Fbx
 				// TODO: Describe the flags with text...
 				animationCurve.Add("KeyAttrFlags", tangentModes);
 				
-				// TODO: Add KeyAttrDataFloat
+				// TODO: Describe the data with text...
+				animationCurve.Add("KeyAttrDataFloat", attrDataFloat);
 				
-				// TODO: Add KeyAttrRefCount
+				animationCurve.Add("KeyAttrRefCount", attrRefCount);
 			}
-
-			FbxNode animationLayer = objects.Add("AnimationLayer", baseLayerId, "AnimLayer::BaseLayer", "");
-			animationLayer.Add(null);
 		}
 
 		private void CreateObjectConnections()
