@@ -10,8 +10,8 @@ namespace Fbx.Data.Animation
 	[Flags]
 	public enum InterpolationType
 	{
-		Constant = 0x00000002,	//!< Constant value until next key.
-		Linear = 0x00000004,		//!< Linear progression to next key.
-		Cubic = 0x00000008		//!< Cubic progression to next key.
+		Constant = 0x00000002,	// Constant value until next key.
+		Linear = 0x00000004,	// Linear progression to next key.
+		Cubic = 0x00000008		// Cubic progression to next key.
 	}
 }

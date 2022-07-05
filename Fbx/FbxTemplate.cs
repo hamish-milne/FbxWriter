@@ -432,8 +432,8 @@ namespace Fbx
 				
 				long[] times = new long[curve.Count];
 				float[] values = new float[curve.Count];
-				int[] tangentModes = new int[curve.Count];
-				const int AttrDataPerKey = 4;
+				int[] attributeFlags = new int[curve.Count];
+				const int AttrDataPerKey = 4; // Pretty sure this depends on things like velocity mode...
 				long[] attrDataFloat = new long[curve.Count * AttrDataPerKey];
 				int[] attrRefCount = new int[curve.Count];
 				for (int i = 0; i < curve.Count; i++)
@@ -441,7 +441,7 @@ namespace Fbx
 					Key key = curve[i];
 					times[i] = key.Time.TimeInInternalFormat;
 					values[i] = key.Value;
-					tangentModes[i] = (int)key.TangentMode;
+					attributeFlags[i] = key.AttributeFlags;
 					
 					// There seem to be four per key?
 					for (int j = 0; j < AttrDataPerKey; j++)
@@ -458,11 +458,20 @@ namespace Fbx
 				animationCurve.Add("KeyValueFloat", values);
 				
 				// TODO: Describe the flags with text...
-				animationCurve.Add("KeyAttrFlags", tangentModes);
+				animationCurve.Add("KeyAttrFlags", attributeFlags);
 				
 				// TODO: Describe the data with text...
+				// Right, so on a nice linear animation this field looks like this:
+				// ;KeyAttrDataFloat: RightSlope:-3000, NextLeftSlope:-3000, RightWeight:0.333333, NextLeftWeight:0.333333, RightVelocity:0, NextLeftVelocity:0; RightSlope:0, NextLeftSlope:0, RightWeight:0.333333, NextLeftWeight:0.333333, RightVelocity:0, NextLeftVelocity:0
+				// Now, remarkably this produces an array of only 8 values:
+				// a: -985956352,-985956352,218434821,0,0,0,218434821,0
+				// That's misleading, huh? Well, I think that depending on the settings some of these fields
+				// *are not used*. For example, if we leave out all of the velocity parameters (which I suspect happens
+				// when the velocity mode is NONE) we end up with 4 float values per key, and 2 keys, so 8 values.
+				// Which works out exactly.
 				animationCurve.Add("KeyAttrDataFloat", attrDataFloat);
 				
+				// Still a mystery what this means.
 				animationCurve.Add("KeyAttrRefCount", attrRefCount);
 			}
 		}

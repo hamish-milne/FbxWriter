@@ -32,9 +32,24 @@ namespace Fbx.Data.Animation
 			this.component = component;
 		}
 
-		public void Add(FbxTime time, float value, TangentModes tangentMode)
+		// Linear
+		public void Add(FbxTime time, float value) 
 		{
-			keys.Add(new Key(time, value, tangentMode));
+			keys.Add(Key.Linear(time, value));
+		}
+		// Constant
+		public void Add(FbxTime time, float value, ConstantModes constantMode = ConstantModes.ConstantStandard)
+		{
+			keys.Add(Key.Constant(time, value, constantMode));
+		}
+		
+		// Cubic
+		public void Add(FbxTime time, float value, TangentModes tangentMode,
+			WeightedModes weightedMode = WeightedModes.WeightedNone,
+			VelocityModes velocityMode = VelocityModes.None,
+			TangentVisibilities tangentVisibility = TangentVisibilities.TangentShowNone)
+		{
+			keys.Add(Key.Cubic(time, value, tangentMode, weightedMode, velocityMode, tangentVisibility));
 		}
 
 		public IEnumerator<Key> GetEnumerator()

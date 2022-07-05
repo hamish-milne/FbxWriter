@@ -10,7 +10,6 @@ namespace Fbx.Data.Animation
 	/// NOTE: I think that means that the KeyAttrDataFloat field of AnimationCurve objects is an array of integers,
 	/// and these specify what data is found where in the array. It's a little bit cryptic.
 	/// </summary>
-	[Flags]
 	public enum TangentDataIndices
 	{
 		RightSlope = 0,			// Index of the right derivative, User and Break tangent mode (data are float).
