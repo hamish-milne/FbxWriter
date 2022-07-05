@@ -18,14 +18,14 @@ namespace Fbx.Data.Animation
 		private AnimatablePropertyBase property;
 		public AnimatablePropertyBase Property => property;
 		
-		private string component;
-		public string Component => component;
+		private Components component;
+		public Components Component => component;
 
 		private List<Key> keys = new List<Key>();
 
 		public int Count => keys.Count;
 
-		public Curve(AnimatablePropertyBase property, string component)
+		public Curve(AnimatablePropertyBase property, Components component)
 		{
 			id = FbxId.GetNewId();
 			this.property = property;

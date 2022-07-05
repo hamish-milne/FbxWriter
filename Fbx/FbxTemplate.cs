@@ -519,7 +519,7 @@ namespace Fbx
 				// and then reference the relevant component, like d|X. 
 				AddConnection(
 					ConnectionTypes.OP, curve.Id, "AnimCurve", "", curve.Property.AnimationCurveNodeId, "AnimCurveNode",
-					curve.Property.NodeName, curve.Component);
+					curve.Property.NodeName, "d|" + curve.Component);
 			}
 
 			// Connection from the base layer to the Take

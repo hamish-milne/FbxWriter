@@ -59,6 +59,7 @@
     <Compile Include="ConnectionTypes.cs" />
     <Compile Include="Data\AnimatableProperty.cs" />
     <Compile Include="Data\AnimatablePropertyBase.cs" />
+    <Compile Include="Data\Animation\Components.cs" />
     <Compile Include="Data\Animation\ConstantModes.cs" />
     <Compile Include="Data\Animation\Curve.cs" />
     <Compile Include="Data\Animation\InterpolationType.cs" />
