@@ -37,6 +37,32 @@ namespace Fbx.Data
 		public Joint Parent => parent;
 		
 		private List<AnimatablePropertyBase> animatableProperties;
+		
+		private static readonly List<FieldInfo> cachedAnimatablePropertyFields = new List<FieldInfo>();
+		private static bool didCacheAnimatablePropertyFields;
+		public static List<FieldInfo> AnimatablePropertyFields
+		{
+			get
+			{
+				if (!didCacheAnimatablePropertyFields)
+				{
+					didCacheAnimatablePropertyFields = true;
+
+					FieldInfo[] allFields = typeof(Joint).GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+					Type animatablePropertyType = typeof(AnimatablePropertyBase);
+			
+					// Find all the animatable property fields using reflection.
+					foreach (FieldInfo fieldInfo in allFields)
+					{
+						if (!animatablePropertyType.IsAssignableFrom(fieldInfo.FieldType))
+							continue;
+
+						cachedAnimatablePropertyFields.Add(fieldInfo);
+					}
+				}
+				return cachedAnimatablePropertyFields;
+			}
+		}
 
 		/// <summary>
 		/// Creates a new joint.
@@ -99,15 +125,10 @@ namespace Fbx.Data
 				return animatableProperties;
 			
 			animatableProperties = new List<AnimatablePropertyBase>();
-			FieldInfo[] allFields = GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
-			Type animatablePropertyType = typeof(AnimatablePropertyBase);
 			
 			// Find all the animatable properties using reflection.
-			foreach (FieldInfo fieldInfo in allFields)
+			foreach (FieldInfo fieldInfo in AnimatablePropertyFields)
 			{
-				if (!animatablePropertyType.IsAssignableFrom(fieldInfo.FieldType))
-					continue;
-
 				AnimatablePropertyBase animatableProperty = (AnimatablePropertyBase)fieldInfo.GetValue(this);
 				animatableProperties.Add(animatableProperty);
 			}

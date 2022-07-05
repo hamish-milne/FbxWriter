@@ -206,9 +206,21 @@ namespace Fbx
 			FbxNode definitions = fbxDocument.Add("Definitions");
 			definitions.Add("Version", 100);
 
+			// Every joint has its own node and an attribute node.
+			// Also if this scene is animated, there's a few extra nodes for every animatable property.
+			int jointNodeCount = 2;
+			if (IsAnimated)
+				jointNodeCount += Joint.AnimatablePropertyFields.Count;
+			
 			// The count is the total number of objects including *their own* counts.
-			int count = 3 + 3 * joints.Count;
-			definitions.Add("Count", 5);
+			int count =
+					1 + // GlobalSettings
+					1 + // Animation Stack
+					1 + // Animation Layer
+					jointNodeCount * joints.Count +
+					curves.Count
+				;
+			definitions.Add("Count", count);
 
 			FbxNode globalSettings = definitions.Add("ObjectType", "GlobalSettings");
 			globalSettings.Add("Count", 1);
@@ -320,12 +332,18 @@ namespace Fbx
 			propertyBlock.AddLclTranslation("Lcl Scaling", Vector3D.One);
 			propertyBlock.AddVisibility("Visibility", true);
 			propertyBlock.AddVisibilityInheritance("Visibility Inheritance", true);
-			
-			FbxNode animationCurveNode = definitions.Add("ObjectType", "AnimationCurveNode");
-			animationCurveNode.Add("Count", joints.Count);
-			propertyTemplate = animationCurveNode.Add("PropertyTemplate", "FbxAnimCurveNode");
-			propertyBlock = new PropertyBlock(propertyTemplate);
-			propertyBlock.AddCompound("d");
+
+			if (IsAnimated)
+			{
+				FbxNode animationCurveNode = definitions.Add("ObjectType", "AnimationCurveNode");
+				animationCurveNode.Add("Count", joints.Count * Joint.AnimatablePropertyFields.Count);
+				propertyTemplate = animationCurveNode.Add("PropertyTemplate", "FbxAnimCurveNode");
+				propertyBlock = new PropertyBlock(propertyTemplate);
+				propertyBlock.AddCompound("d");
+				
+				FbxNode animationCurve = definitions.Add("ObjectType", "AnimationCurve");
+				animationCurve.Add("Count", curves.Count);
+			}
 		}
 
 		private void CreateObjectProperties()
