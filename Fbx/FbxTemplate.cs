@@ -17,8 +17,7 @@ namespace Fbx
 		private const string ApplicationName = "FbxWriter-ForAnimations";
 		private const string ApplicationVersion = "000001";
 		private const string VendorName = "YourNameHere";
-
-		private const TimeModes TimeMode = TimeModes.Frames30;
+		
 		private const TimeProtocols TimeProtocol = TimeProtocols.DefaultProtocol;
 		
 		private readonly FbxId animationStackId = FbxId.GetNewId();
@@ -33,17 +32,123 @@ namespace Fbx
 		private readonly List<FbxConnection> connections = new List<FbxConnection>();
 
 		private bool IsAnimated => curves.Count > 0;
+		
+		private TimeModes timeMode = TimeModes.Frames30;
+		private long customFrameRate;
+		
+		private FbxTime timeSpanStart;
+		private FbxTime timeSpanEnd;
+		private FbxTime localStart;
+		private FbxTime localStop;
+		private FbxTime referenceStart;
+		private FbxTime referenceStop;
 
 		/// <summary>
 		/// Create a new FBX Template.
 		/// </summary>
 		/// <param name="path">The file path ending with .fbx that the data will be written to.</param>
-		public FbxTemplate(string path)
+		public FbxTemplate(
+			string path, long lengthInFrames = 60, TimeModes timeMode = TimeModes.Frames30, int customFrameRate = -1)
 		{
 			this.path = path;
 
 			// Create a document.
-			fbxDocument = new FbxDocument { Version = FbxVersion.v7_5 };
+			fbxDocument = new FbxDocument {Version = FbxVersion.v7_5};
+
+			this.timeMode = timeMode;
+			this.customFrameRate = customFrameRate;
+			FbxTime.FrameRate = GetFrameRateBasedOnTimeMode();
+
+			timeSpanStart = FbxTime.Frames(1);
+			timeSpanEnd = FbxTime.Frames(lengthInFrames);
+
+			// You don't really need to touch these. You can though if you know what you're doing.
+			localStart = timeSpanStart;
+			localStop = timeSpanEnd;
+			referenceStart = timeSpanStart;
+			referenceStop = timeSpanEnd;
+		}
+
+		public void SetRange(FbxTime timeSpanStart, FbxTime timeSpanEnd,
+			FbxTime localStart, FbxTime localStop,
+			FbxTime referenceStart, FbxTime referenceStop)
+		{
+			this.timeSpanStart = timeSpanStart;
+			this.timeSpanEnd = timeSpanEnd;
+			this.localStart = localStart;
+			this.localStop = localStop;
+			this.referenceStart = referenceStart;
+			this.referenceStop = referenceStop;
+		}
+		
+		public void SetRange(FbxTime timeSpanStart, FbxTime timeSpanEnd, FbxTime localStart, FbxTime localStop)
+		{
+			this.timeSpanStart = timeSpanStart;
+			this.timeSpanEnd = timeSpanEnd;
+			this.localStart = localStart;
+			this.localStop = localStop;
+			referenceStart = localStart;
+			referenceStop = localStop;
+		}
+		
+		public void SetRange(FbxTime timeSpanStart, FbxTime timeSpanEnd)
+		{
+			this.timeSpanStart = timeSpanStart;
+			this.timeSpanEnd = timeSpanEnd;
+			localStart = timeSpanStart;
+			localStop = timeSpanEnd;
+			referenceStart = timeSpanStart;
+			referenceStop = timeSpanEnd;
+		}
+
+		private double GetFrameRateBasedOnTimeMode()
+		{
+			// DISCLAIMER: These values are based on the comments on the enum, and some of them claim to be
+			// approximations. If you intend to use one of the more obscure ones like Frames30Drop or NTSCFullFrame
+			// you should double-check that the value is what you expect it to be.
+			switch (timeMode)
+			{
+				case TimeModes.Frames120:
+					return 120;
+				case TimeModes.Frames100:
+					return 100;
+				case TimeModes.Frames60:
+					return 60;
+				case TimeModes.Frames50:
+					return 50;
+				case TimeModes.Frames48:
+					return 48;
+				case TimeModes.DefaultMode:
+				case TimeModes.Frames30:
+					return 30;
+				case TimeModes.Frames30Drop:
+					return 30;
+				case TimeModes.NTSCDropFrame:
+					return 29.97;
+				case TimeModes.NTSCFullFrame:
+					return 29.97;
+				case TimeModes.PAL:
+					return 25;
+				case TimeModes.Frames24:
+					return 24;
+				case TimeModes.Frames1000:
+					return 1000;
+				case TimeModes.FilmFullFrame:
+					return 23.976;
+				case TimeModes.Custom:
+					return customFrameRate;
+				case TimeModes.Frames96:
+					return 96;
+				case TimeModes.Frames72:
+					return 72;
+				case TimeModes.Frames59dot94:
+					return 59.95;
+				case TimeModes.Frames119dot88:
+					return 119.88;
+				case TimeModes.ModesCount:
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 		/// <summary>
@@ -168,12 +273,12 @@ namespace Fbx
 			properties.AddDouble("OriginalUnitScaleFactor", 1);
 			properties.AddColorRGB("AmbientColor", new ColorRGB(0, 0, 0));
 			properties.AddString("DefaultCamera", "Producer Perspective");
-			properties.AddEnum("TimeMode", TimeMode);
+			properties.AddEnum("TimeMode", timeMode);
 			properties.AddEnum("TimeProtocol", TimeProtocol);
 			properties.AddEnum("SnapOnFrameMode", 0);
-			properties.AddTime("TimeSpanStart", new DateTime(1539538600));
-			properties.AddTime("TimeSpanStop", new DateTime(92372316000));
-			properties.AddDouble("CustomFrameRate", -1);
+			properties.AddTime("TimeSpanStart", timeSpanStart);
+			properties.AddTime("TimeSpanStop", timeSpanEnd);
+			properties.AddDouble("CustomFrameRate", customFrameRate);
 			properties.AddCompound("TimeMarker");
 			properties.AddInteger("CurrentTimeMarker", -1);
 		}
@@ -354,10 +459,10 @@ namespace Fbx
 			
 			FbxNode animationStack = objects.Add("AnimationStack", animationStackId, "AnimStack::Take 001", "");
 			propertyBlock = new PropertyBlock(animationStack);
-			propertyBlock.AddTime("LocalStart", new DateTime(1539538600));
-			propertyBlock.AddTime("LocalStop", new DateTime(46186158000));
-			propertyBlock.AddTime("ReferenceStart", new DateTime(1539538600));
-			propertyBlock.AddTime("ReferenceStop", new DateTime(46186158000));
+			propertyBlock.AddTime("LocalStart", localStart);
+			propertyBlock.AddTime("LocalStop", localStop);
+			propertyBlock.AddTime("ReferenceStart", referenceStart);
+			propertyBlock.AddTime("ReferenceStop", referenceStop);
 			
 			FbxNode animationLayer = objects.Add("AnimationLayer", baseLayerId, "AnimLayer::BaseLayer", "");
 			animationLayer.Add(null);
@@ -546,8 +651,8 @@ namespace Fbx
 			takes.Add("Current", "Take 001");
 			FbxNode take001 = takes.Add("Take", "Take 001");
 			take001.Add("FileName", "Take_001.tak");
-			take001.Add("LocalTime", 1539538600, 46186158000);
-			take001.Add("ReferenceTime", 1539538600, 46186158000);
+			take001.Add("LocalTime", localStart.TimeInInternalFormat, localStop.TimeInInternalFormat);
+			take001.Add("ReferenceTime", referenceStart.TimeInInternalFormat, referenceStop.TimeInInternalFormat);
 		}
 		
 		private static string Shorten(ConnectionTypes connectionType)

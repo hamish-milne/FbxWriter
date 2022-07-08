@@ -1,4 +1,5 @@
 using System;
+using Fbx.Data.Times;
 
 namespace Fbx.PropertyBlocks
 {
@@ -43,11 +44,11 @@ namespace Fbx.PropertyBlocks
 			root.Add(PropertyName, name, "DateTime", "", "", value.ToString(DateTimeFormat));
 		}
 		
-		public void AddTime(string name, DateTime value)
+		public void AddTime(string name, FbxTime value)
 		{
-			root.Add(PropertyName, name, "KTime", "Time", "", value.Ticks);
+			root.Add(PropertyName, name, "KTime", "Time", "", value);
 		}
-		
+
 		public void AddBool(string name, bool value)
 		{
 			root.Add(PropertyName, name, "bool", "", "", value ? 1 : 0);

@@ -1,3 +1,5 @@
+using System;
+
 namespace Fbx.Data.Times
 {
 	/// <summary>
@@ -12,13 +14,18 @@ namespace Fbx.Data.Times
 	/// </summary>
 	public struct FbxTime
 	{
-		private const long FrameRate = 30;
+		private static double frameRate = 30;
+		public static double FrameRate
+		{
+			get => frameRate;
+			set => frameRate = value;
+		}
 
 		/// <summary>
 		/// What seems to be the interval between frames as exported from a 30FPS file.
 		/// </summary>
-		private const long IntervalPerSecond = 46186158000;
-		private const long IntervalPerFrame = IntervalPerSecond / FrameRate;
+		private static double IntervalPerSecond = 46186158000;
+		private static double IntervalPerFrame => IntervalPerSecond / FrameRate;
 		
 		private long time;
 		
@@ -35,24 +42,36 @@ namespace Fbx.Data.Times
 		/// Initializes the time based on the frame count. Note that the frame count should start with 1!
 		/// </summary>
 		/// <param name="frame">Frame count, with the first one being 1.</param>
-		public void SetViaFrame(long frame)
+		public static FbxTime Frames(long frame)
 		{
-			// Had to reverse engineer the format because it's not documented anywhere, lol
-			// NOTE: This currently assumes a 30 FPS file. If you want to support other formats, you need to update this
-			// conversion to work for every type of TimeMode. Have fun with that...
-			time = frame * IntervalPerFrame;
+			return new FbxTime { time = (long)(frame * IntervalPerFrame) };
+		}
+		
+		public static FbxTime Seconds(double seconds)
+		{
+			return new FbxTime { time = (long)(seconds * IntervalPerSecond) };
 		}
 
 		/// <summary>
 		/// Converts a frame index to an FbxTime object.
 		/// </summary>
-		/// <param name="frame">The frame index.</param>
+		/// <param name="frames">The frame index.</param>
 		/// <returns>An FbxTime object representing the specified frame index.</returns>
-		public static implicit operator FbxTime(long frame)
+		public static implicit operator FbxTime(long frames)
 		{
-			FbxTime fbxTime = new FbxTime();
-			fbxTime.SetViaFrame(frame);
-			return fbxTime;
+			return Frames(frames);
+		}
+		
+		/// <summary>
+		/// Converts a DateTime to an FbxTime object.
+		/// </summary>
+		/// <param name="time">The time to convert.</param>
+		/// <returns>An FbxTime object representing the specified date and time.</returns>
+		public static implicit operator FbxTime(DateTime time)
+		{
+			double ticksPerSecond = 10000000; // 10 million ticks per second.
+			double seconds = time.Ticks / ticksPerSecond;
+			return Seconds(seconds);
 		}
 
 		public override string ToString()
