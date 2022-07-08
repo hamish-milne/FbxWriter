@@ -2,6 +2,11 @@ using System;
 
 namespace Fbx.Data.Animation
 {
+	/// <summary>
+	/// Taken from the Autodesk FBX SDK and reformatted. All rights reserved.
+	///
+	/// Flags for whether a keyframe's tangents use velocity or not.
+	/// </summary>
 	[Flags]
 	public enum VelocityModes
 	{

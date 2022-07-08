@@ -2,6 +2,11 @@ using System;
 
 namespace Fbx.Data.Animation
 {
+	/// <summary>
+	/// Taken from the Autodesk FBX SDK and reformatted. All rights reserved.
+	///
+	/// The types of tangents that a constant keyframe can have.
+	/// </summary>
 	[Flags]
 	public enum ConstantModes
 	{

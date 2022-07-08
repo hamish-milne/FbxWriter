@@ -2,6 +2,11 @@ using System;
 
 namespace Fbx.Data.Animation
 {
+	/// <summary>
+	/// Taken from the Autodesk FBX SDK and reformatted. All rights reserved.
+	///
+	/// Flags to determine how a keyframe's tangents are weighted.
+	/// </summary>
 	[Flags]
 	public enum WeightedModes
 	{

@@ -2,6 +2,11 @@ using System;
 
 namespace Fbx.Data.Animation
 {
+	/// <summary>
+	/// Taken from the Autodesk FBX SDK and reformatted. All rights reserved.
+	///
+	/// Flags for how tangents should be visualized.
+	/// </summary>
 	[Flags]
 	public enum TangentVisibilities
 	{
