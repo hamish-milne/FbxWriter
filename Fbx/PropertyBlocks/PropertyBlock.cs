@@ -112,7 +112,7 @@ namespace Fbx.PropertyBlocks
 			root.Add(PropertyName, name, "Vector3D", "Vector", "", value.X, value.Y, value.Z);
 		}
 		
-		// Peculiar seemingly rare custom property types.
+		// These are for transformations.
 		public void AddLclTranslation(string name, Vector3D value)
 		{
 			root.Add(PropertyName, name, "Lcl Translation", "", "A", value.X, value.Y, value.Z);
