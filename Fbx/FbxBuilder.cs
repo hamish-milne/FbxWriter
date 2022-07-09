@@ -9,10 +9,11 @@ using Fbx.PropertyBlocks;
 namespace Fbx
 {
 	/// <summary>
-	/// Template for writing valid FBX files. The intention is to set it up to recreate a very basic reference file
-	/// and then gradually make parts of that file dynamic and support real data.
+	/// Utility class for writing valid FBX files. Contains the general structure of FBX files and allows certain data
+	/// classes to be added like Joints and Curves to output a valid animation file. So instead of worrying about nodes
+	/// and the FBX file structure you can focus more on what kind of data you want to put into it. 
 	/// </summary>
-	public class FbxTemplate
+	public class FbxBuilder
 	{
 		private const string ApplicationName = "FbxWriter-ForAnimations";
 		private const string ApplicationVersion = "000001";
@@ -47,7 +48,7 @@ namespace Fbx
 		/// Create a new FBX Template.
 		/// </summary>
 		/// <param name="path">The file path ending with .fbx that the data will be written to.</param>
-		public FbxTemplate(
+		public FbxBuilder(
 			string path, long lengthInFrames = 60, TimeModes timeMode = TimeModes.Frames30, int customFrameRate = -1)
 		{
 			this.path = path;
