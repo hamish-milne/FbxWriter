@@ -549,14 +549,16 @@ namespace Fbx
 					values[i] = key.Value;
 					attributeFlags[i] = key.AttributeFlags;
 					
-					// There seem to be four per key?
+					// There seem to be four per defined attribute, per key.
 					for (int j = 0; j < AttrDataPerKey; j++)
 					{
-						// TODO: Figure out what the values of this field actually mean.
+						// TODO: Actually support this. See the Blender docs for more info:
+						// https://archive.blender.org/wiki/index.php/User:Mont29/Foundation/FBX_File_Structure/#Animation
 						attrDataFloat[i * AttrDataPerKey + j] = 0;
 					}
 
-					// TODO: Figure out what the values of this field actually mean. 
+					// TODO: Actually support this. Right now no KeyAttrData gets re-used and everything is unique.
+					// It works, it's just not very efficient.
 					attrRefCount[i] = 1;
 				}
 				
@@ -567,17 +569,12 @@ namespace Fbx
 				animationCurve.Add("KeyAttrFlags", attributeFlags);
 				
 				// TODO: Describe the data with text...
-				// Right, so on a nice linear animation this field looks like this:
-				// ;KeyAttrDataFloat: RightSlope:-3000, NextLeftSlope:-3000, RightWeight:0.333333, NextLeftWeight:0.333333, RightVelocity:0, NextLeftVelocity:0; RightSlope:0, NextLeftSlope:0, RightWeight:0.333333, NextLeftWeight:0.333333, RightVelocity:0, NextLeftVelocity:0
-				// Now, remarkably this produces an array of only 8 values:
-				// a: -985956352,-985956352,218434821,0,0,0,218434821,0
-				// That's misleading, huh? Well, I think that depending on the settings some of these fields
-				// *are not used*. For example, if we leave out all of the velocity parameters (which I suspect happens
-				// when the velocity mode is NONE) we end up with 4 float values per key, and 2 keys, so 8 values.
-				// Which works out exactly.
 				animationCurve.Add("KeyAttrDataFloat", attrDataFloat);
 				
-				// Still a mystery what this means.
+				// This property is here to allow you to re-use KeyAttrData across several keyframes. For example: if
+				// the tangents remain exactly the same for 10 keyframes, you can specify 10 and the tangent data
+				// will be re-used for the next 10 frames. More info on that here:
+				// https://archive.blender.org/wiki/index.php/User:Mont29/Foundation/FBX_File_Structure/#Animation
 				animationCurve.Add("KeyAttrRefCount", attrRefCount);
 			}
 		}
