@@ -7,7 +7,7 @@ namespace Fbx.Data
 {
 	/// <summary>
 	/// Represents a single joint. The intended workflow is that you create a joint hierarchy and animation data,
-	/// add it to an FbxTemplate, then write that to an FBX. This allows you to work on a simple and intuitive level
+	/// add it to an FbxBuilder, then write that to an FBX. This allows you to work on a simple and intuitive level
 	/// which is translated to the complicated FBX syntax under the hood. 
 	/// </summary>
 	public class Joint : IAnimatablePropertyOwner

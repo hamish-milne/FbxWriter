@@ -3,7 +3,7 @@ using System;
 namespace Fbx.Data.Animation
 {
 	/// <summary>
-	///Taken from the Autodesk FBX SDK and reformatted. All rights reserved.
+	/// Taken from the Autodesk FBX SDK and reformatted. All rights reserved.
 	/// 
 	/// The interpolation type that keys can have. This seems to get combined with TangentMode into a single integer.
 	/// </summary>
