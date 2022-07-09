@@ -25,6 +25,7 @@ namespace Fbx
 		/// </summary>
 		public static FbxId GetNewId()
 		{
+			// TODO: More elaborate ID system? These are not globally unique, only within the file. Is that okay?
 			return new FbxId { id = lastId++ };
 		}
 	}
