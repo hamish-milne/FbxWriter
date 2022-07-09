@@ -5,6 +5,7 @@
 - Added high-level classes for creating Joints and Animation Curves.
 - Added `FBXTime` wrapper to convert from frames or seconds to the internal FBX format
 - Added basic support for unique ID generation (could be improved, but it works)
+- Improved syntax for adding new nodes and property blocks
 - Expanded `FBXWriter` to support inline comments, headers and line breaks
 - Expanded `FBXWriter` to support `FBXTime` and various other data types
 
