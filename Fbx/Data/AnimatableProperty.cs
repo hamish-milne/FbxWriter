@@ -9,7 +9,11 @@ namespace Fbx.Data
 	public class AnimatableProperty<ValueType> : AnimatablePropertyBase
 	{
 		private ValueType value;
-		public ValueType Value => value;
+		public ValueType Value
+		{
+			get => value;
+			set => this.value = value;
+		}
 
 		private FbxNode animationCurveNode;
 

@@ -34,8 +34,12 @@ namespace Fbx.Data
 		public AnimatableProperty<Vector3D> Scaling => scaling;
 
 		private Joint parent;
-		public Joint Parent => parent;
-		
+		public Joint Parent
+		{
+			get => parent;
+			set => parent = value;
+		}
+
 		private List<AnimatablePropertyBase> animatableProperties;
 		
 		private static readonly List<FieldInfo> cachedAnimatablePropertyFields = new List<FieldInfo>();
