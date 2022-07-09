@@ -1,9 +1,9 @@
 namespace Fbx
 {
 	/// <summary>
-	/// Generates a unique ID for an FBX node.
+	/// Generates a unique ID for an FBX node or property.
 	/// </summary>
-	public class FbxNodeId
+	public class FbxId
 	{
 		private const long InitialId = 2000000000000;
 
@@ -17,15 +17,16 @@ namespace Fbx
 		/// <returns>The 13-digit long unique string representing a node.</returns>
 		public override string ToString()
 		{
-			return id.ToString("0000000000000");
+			return id.ToString();
 		}
 
 		/// <summary>
 		/// Generates a new unique identifier for an FBX node.
 		/// </summary>
-		public static FbxNodeId GetNewId()
+		public static FbxId GetNewId()
 		{
-			return new FbxNodeId { id = lastId++ };
+			// TODO: More elaborate ID system? These are not globally unique, only within the file. Is that okay?
+			return new FbxId { id = lastId++ };
 		}
 	}
 }

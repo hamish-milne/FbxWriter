@@ -56,7 +56,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommentTypes.cs" />
+    <Compile Include="ConnectionTypes.cs" />
+    <Compile Include="Data\AnimatableProperty.cs" />
+    <Compile Include="Data\AnimatablePropertyBase.cs" />
+    <Compile Include="Data\Animation\Components.cs" />
+    <Compile Include="Data\Animation\ConstantModes.cs" />
+    <Compile Include="Data\Animation\Curve.cs" />
+    <Compile Include="Data\Animation\InterpolationType.cs" />
+    <Compile Include="Data\Animation\Key.cs" />
+    <Compile Include="Data\Animation\TangentDataIndices.cs" />
+    <Compile Include="Data\Animation\TangentModes.cs" />
+    <Compile Include="Data\Animation\TangentVisibilities.cs" />
+    <Compile Include="Data\Animation\VelocityModes.cs" />
+    <Compile Include="Data\Animation\WeightedModes.cs" />
+    <Compile Include="Data\IAnimatablePropertyOwner.cs" />
     <Compile Include="Data\Joint.cs" />
+    <Compile Include="Data\Times\FbxTime.cs" />
+    <Compile Include="Data\Times\TimeModes.cs" />
+    <Compile Include="Data\Times\TimeProtocols.cs" />
     <Compile Include="DeflateWithChecksum.cs" />
     <Compile Include="ErrorLevel.cs" />
     <Compile Include="FbxAsciiWriter.cs" />
@@ -64,15 +81,16 @@
     <Compile Include="FbxBinaryReader.cs" />
     <Compile Include="FbxBinaryWriter.cs" />
     <Compile Include="FbxComment.cs" />
+    <Compile Include="FbxConnection.cs" />
     <Compile Include="FbxDocument.cs" />
     <Compile Include="FbxException.cs" />
     <Compile Include="FbxLineBreak.cs" />
     <Compile Include="FbxNode.cs" />
     <Compile Include="FbxAsciiReader.cs" />
     <Compile Include="FbxIO.cs" />
-    <Compile Include="FbxNodeId.cs" />
+    <Compile Include="FbxId.cs" />
     <Compile Include="FbxNodeList.cs" />
-    <Compile Include="FbxTemplate.cs" />
+    <Compile Include="FbxBuilder.cs" />
     <Compile Include="FbxVersion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyBlocks\ColorRGB.cs" />
