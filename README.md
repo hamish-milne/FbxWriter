@@ -28,6 +28,13 @@ builder.AddCurve(joint1PositionCurve);
 builder.Write();
 ```
 
+### Known issues
+- `FbxId` generates ID's that are unique to the file, but they're not globally unique. Not sure if this is problematic. Works fine for me.
+- Custom tangent slopes, weights and velocities are not currently supported. This leaves the following possible tangents:
+    - Constant
+    - Linear
+    - Cubic with flat tangents, or with automatic tangents.
+
 ## Original docs
 - Read FBX binary files (**Done**)
 - Read FBX ASCII files (**Done**)
