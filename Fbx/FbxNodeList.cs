@@ -22,6 +22,40 @@ namespace Fbx
 		/// <param name="name"></param>
 		/// <returns>The child node, or null</returns>
 		public FbxNode this[string name] { get { return Nodes.Find(n => n != null && n.Name == name); } }
+		
+		/// <summary>
+		/// Adds a new node and returns it. Little syntactic sugar for easier creation of FBX files.
+		/// </summary>
+		/// <param name="name">Name of the node.</param>
+		/// <param name="value">Value of the node.</param>
+		/// <param name="properties">List of properties which are appended after the value, separated by commas.</param>
+		/// <returns></returns>
+		public FbxNode Add(string name, object value = null, params object[] properties)
+		{
+			// Allow a null node to be added, this is useful for specifying that a node usually has children but
+			// currently doesn't.
+			if (string.IsNullOrEmpty(name))
+			{
+				Nodes.Add(null);
+				return null;
+			}
+			
+			FbxNode node = new FbxNode { Name = name, Value = value };
+			Nodes.Add(node);
+			node.Properties.AddRange(properties);
+			return node;
+		}
+		
+		public void AddLineBreak()
+		{
+			Nodes.Add(new FbxLineBreak());
+		}
+
+		public void AddComment(string text, CommentTypes type)
+		{
+			FbxComment comment = new FbxComment { Name = text, Type = type };
+			Nodes.Add(comment);
+		}
 
 		/// <summary>
 		/// Gets a child node, using a '/' separated path

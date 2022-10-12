@@ -2,6 +2,7 @@
 using System.Text;
 using System.IO;
 using System.Collections.Generic;
+using Fbx.Data.Times;
 
 namespace Fbx
 {
@@ -10,6 +11,10 @@ namespace Fbx
 	/// </summary>
 	public class FbxAsciiWriter
 	{
+		private const string LineBreak = "\n";
+		private const string CommentPrefix = ";";
+		private const string Divider = "----------------------------------------------------";
+		
 		private readonly Stream stream;
 
 		/// <summary>
@@ -39,9 +44,39 @@ namespace Fbx
 		{
 			nodePath.Push(node.Name ?? "");
 			int lineStart = sb.Length;
-			// Write identifier
+
+			// Add indentation.
 			for (int i = 0; i < indentLevel; i++)
 				sb.Append('\t');
+			
+			// Comments are text nodes that are there purely for organizing the ASCII file.
+			if (node is FbxComment comment)
+			{
+				// Add the comment itself.
+				string commentText = CommentPrefix;
+				bool hasSpace = comment.Type == CommentTypes.Header;
+				bool hasDivider = comment.Type == CommentTypes.Header;
+				if (hasSpace)
+					commentText += " ";
+				commentText += comment.Name;
+				commentText += LineBreak;
+				sb.Append(commentText);
+
+				// If specified, also add a divider.
+				if (hasDivider)
+					sb.Append(CommentPrefix + (hasSpace ? " " : "") + Divider + LineBreak);
+				
+				return;
+			}
+
+			// Linebreaks are empty nodes that are there purely for creating empty space in the ASCII file.
+			if (node is FbxLineBreak)
+			{
+				sb.Append(LineBreak);
+				return;
+			}
+
+			// Write identifier
 			sb.Append(node.Name).Append(':');
 
 			// Write properties
@@ -97,6 +132,12 @@ namespace Fbx
 					}
 				} else if (p is char)
 					sb.Append((char) p);
+				else if (p is bool boolean)
+					sb.Append(boolean ? '1' : '0');
+				else if (p is FbxId id)
+					sb.Append(id);
+				else if (p is FbxTime time)
+					sb.Append(time);
 				else if(p.GetType().IsPrimitive && p is IFormattable)
 					sb.Append(p);
 				else
@@ -141,7 +182,8 @@ namespace Fbx
 			var vMajor = (int)document.Version/1000;
 			var vMinor = ((int) document.Version%1000)/100;
 			var vRev = ((int) document.Version%100)/10;
-			sb.Append($"; FBX {vMajor}.{vMinor}.{vRev} project file\n\n");
+			sb.Append($"; FBX {vMajor}.{vMinor}.{vRev} project file\n");
+			sb.Append(Divider + "\n\n");
 
 			nodePath.Clear();
 			foreach (var n in document.Nodes)
