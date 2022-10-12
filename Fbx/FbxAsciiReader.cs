@@ -206,22 +206,22 @@ namespace Fbx
 						{
 							if (str.Split('.', 'e', 'E')[1].Length > 6)
 							{
-								double d;
-								if (!double.TryParse(str, out d))
+								double d;								
+								if (!double.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out d))
 									throw new FbxException(line, column,
 										"Invalid number");
 								return d;
 							} else
 							{
 								float f;
-								if (!float.TryParse(str, out f))
+								if (!float.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out f))
 									throw new FbxException(line, column,
 										"Invalid number");
 								return f;
 							}
 						}
 						long l;
-						if (!long.TryParse(str, out l))
+						if (!long.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out l))
 							throw new FbxException(line, column,
 								"Invalid integer");
 						// Check size and return the smallest possible
